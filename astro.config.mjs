@@ -18,4 +18,6 @@ export default defineConfig({
       rehypePlugins: [rehypeKatex],
     }),
   },
+  site: 'https://mathletesv.github.io',
+  base: '/multiplicative-weights',
 });
