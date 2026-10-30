@@ -1,0 +1,29 @@
+---
+import ReadingLayout from './ReadingLayout.astro';
+import LecturePagination from '../components/LecturePagination.astro';
+import type { Lecture } from '../data/course';
+import { lectures, lectureNumber } from '../data/course';
+
+interface Props {
+  lecture: Lecture;
+}
+
+const { lecture } = Astro.props;
+const index = lectures.findIndex((item) => item.frontmatter.slug === lecture.frontmatter.slug);
+const headings = lecture.getHeadings().filter((heading) => heading.depth === 2);
+---
+
+<ReadingLayout
+  title={lecture.frontmatter.title}
+  eyebrow={`Section ${lectureNumber(lecture)} / ${String(lectures.length).padStart(2, '0')}`}
+  currentSlug={lecture.frontmatter.slug}
+  headings={headings}
+>
+  <slot />
+  <LecturePagination
+    slot="pagination"
+    previous={lectures[index - 1]}
+    next={lectures[index + 1]}
+  />
+</ReadingLayout>
+

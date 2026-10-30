@@ -1,0 +1,44 @@
+---
+interface Props {
+  headings: { slug: string; text: string }[];
+}
+
+const { headings } = Astro.props;
+---
+
+{headings.length > 0 && <nav aria-label="On this page" class="page-outline">
+  <p class="eyebrow">On this page</p>
+  <ol>
+    {headings.map((heading) => (
+      <li><a href={`#${heading.slug}`}>{heading.text}</a></li>
+    ))}
+  </ol>
+</nav>}
+
+<style>
+  .page-outline {
+    margin-top: var(--space-8);
+    border-top: 1px solid var(--color-rule);
+    padding-top: var(--space-8);
+  }
+
+  ol {
+    display: grid;
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: block;
+    padding: var(--space-3) var(--space-2);
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+</style>

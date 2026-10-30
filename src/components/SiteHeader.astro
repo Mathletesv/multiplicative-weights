@@ -1,0 +1,76 @@
+---
+import { sitePath } from '../lib/paths';
+
+---
+
+<header class="site-header site-container">
+  <a class="wordmark" href={sitePath()} aria-label="Multiplicative weights home">
+    <span class="monogram" aria-hidden="true">mw.</span>
+    <span class="wordmark-title">Multiplicative weights</span>
+  </a>
+  <nav aria-label="Main navigation">
+    <a href={sitePath('#sections')}>Sections</a>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    min-height: var(--space-24);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: var(--space-12);
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  .monogram {
+    color: var(--color-accent);
+    font-family: var(--font-reading);
+    font-size: 2rem;
+    font-style: italic;
+    letter-spacing: -0.08em;
+  }
+
+  .wordmark-title {
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  nav {
+    display: flex;
+    gap: var(--space-8);
+  }
+
+  nav a {
+    display: grid;
+    align-items: center;
+    min-height: var(--space-12);
+    border-bottom: 2px solid transparent;
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+
+  @media (max-width: 40rem) {
+    .site-header {
+      min-height: var(--space-20);
+    }
+
+    .wordmark-title {
+      display: none;
+    }
+
+    nav {
+      gap: var(--space-6);
+    }
+  }
+</style>

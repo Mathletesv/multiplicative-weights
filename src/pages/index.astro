@@ -1,16 +1,81 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CourseIndex from '../components/CourseIndex.astro';
+import { lectures, lecturePath } from '../data/course';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout>
+  <section class="introduction" aria-labelledby="course-title">
+    <div>
+      <p class="eyebrow">Computational learning theory</p>
+      <h1 id="course-title">Multiplicative<br /><em>weights.</em></h1>
+      <div class="course-meta">
+        <span>{lectures.length} sections</span>
+      </div>
+    </div>
+    <a class="start-link" href={lecturePath(lectures[0])}>
+      Start with section 01 <span aria-hidden="true">→</span>
+    </a>
+  </section>
+
+  <CourseIndex />
+
+</BaseLayout>
+
+<style>
+  .introduction {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-8);
+    padding-block: var(--space-16);
+  }
+
+  h1 {
+    margin-top: var(--space-6);
+    font-size: var(--text-display);
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+  }
+
+  h1 em {
+    color: var(--color-accent);
+    font-weight: 400;
+  }
+
+  .course-meta {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .start-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+    min-height: var(--space-12);
+    border-radius: var(--radius-panel);
+    padding: var(--space-4) var(--space-6);
+    background: var(--color-accent);
+    color: var(--color-surface);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+
+  .start-link:hover {
+    background: var(--color-accent-hover);
+  }
+
+  @media (max-width: 40rem) {
+    .introduction {
+      align-items: flex-start;
+      flex-direction: column;
+      padding-block: var(--space-10) var(--space-12);
+    }
+
+  }
+</style>

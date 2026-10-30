@@ -1,0 +1,34 @@
+---
+import 'katex/dist/katex.min.css';
+import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { sitePath } from '../lib/paths';
+
+interface Props {
+  title?: string;
+  frontmatter?: { title?: string };
+}
+
+const title = Astro.props.title ?? Astro.props.frontmatter?.title ?? 'Multiplicative Weights';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href={sitePath('favicon.svg')} />
+    <link rel="icon" href={sitePath('favicon.ico')} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <SiteHeader />
+    <main id="main-content" class="site-container" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>

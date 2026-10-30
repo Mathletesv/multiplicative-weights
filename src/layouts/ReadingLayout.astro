@@ -1,0 +1,176 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import CourseNavigation from '../components/CourseNavigation.astro';
+import PageOutline from '../components/PageOutline.astro';
+
+interface Props {
+  title: string;
+  eyebrow: string;
+  headings: { slug: string; text: string }[];
+  currentSlug?: string;
+}
+
+const { title, eyebrow, headings, currentSlug } = Astro.props;
+---
+
+<BaseLayout title={`${title} · Multiplicative weights`}>
+  <div class="reading-layout">
+    <aside class="desktop-rail">
+      <div class="rail-content">
+        <CourseNavigation currentSlug={currentSlug} />
+        <PageOutline headings={headings} />
+      </div>
+    </aside>
+
+    <div class="reading-main">
+      <details class="mobile-navigation">
+        <summary>Contents</summary>
+        <div class="mobile-navigation-content">
+          <CourseNavigation currentSlug={currentSlug} />
+          <PageOutline headings={headings} />
+        </div>
+      </details>
+
+      <article aria-labelledby="page-title">
+        <header class="article-header">
+          <p class="eyebrow">{eyebrow}</p>
+          <h1 id="page-title">{title}</h1>
+          <slot name="metadata" />
+        </header>
+        <div class="reading-content"><slot /></div>
+      </article>
+      <slot name="pagination" />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .reading-layout {
+    display: grid;
+    grid-template-columns: var(--width-rail) minmax(0, 1fr);
+    gap: var(--layout-gap);
+    padding-top: var(--space-12);
+  }
+
+  .desktop-rail {
+    min-width: 0;
+  }
+
+  .rail-content {
+    position: sticky;
+    top: var(--space-8);
+    max-height: calc(100dvh - var(--space-16));
+    overflow-y: auto;
+    padding: var(--space-2) var(--space-2) var(--space-6);
+    scrollbar-width: thin;
+  }
+
+  .reading-main {
+    width: 100%;
+    min-width: 0;
+    padding-top: var(--space-2);
+  }
+
+  .article-header {
+    margin-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+    padding-bottom: var(--space-10);
+  }
+
+  h1 {
+    margin-top: var(--space-5);
+    font-size: var(--text-title);
+    letter-spacing: -0.035em;
+    line-height: var(--leading-heading);
+  }
+
+  .reading-content {
+    font-family: var(--font-reading);
+    font-size: var(--text-body);
+    line-height: var(--leading-reading);
+    overflow-wrap: break-word;
+  }
+
+  .reading-content :global(h2) {
+    margin-block: var(--space-16) var(--space-6);
+    scroll-margin-top: var(--space-8);
+    font-size: var(--text-section);
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .reading-content :global(> h2:first-child) {
+    margin-top: 0;
+  }
+
+  .reading-content :global(h3) {
+    margin-block: var(--space-8) var(--space-4);
+    font-size: var(--text-body);
+  }
+
+  .reading-content :global(p + p) {
+    margin-top: var(--space-5);
+  }
+
+  .reading-content :global(p),
+  .reading-content :global(ul),
+  .reading-content :global(ol),
+  .reading-content :global(blockquote) {
+    max-inline-size: var(--width-prose);
+  }
+
+  .reading-content :global(ul),
+  .reading-content :global(ol) {
+    padding-inline-start: var(--space-6);
+  }
+
+  .mobile-navigation {
+    display: none;
+  }
+
+  @media (max-width: 79.99rem) {
+    .reading-layout {
+      display: block;
+      padding-top: var(--space-8);
+    }
+
+    .desktop-rail {
+      display: none;
+    }
+
+    .reading-main {
+      margin-inline: auto;
+      padding-top: 0;
+    }
+
+    .mobile-navigation {
+      display: block;
+      margin-bottom: var(--space-10);
+      border: 1px solid var(--color-control-border);
+      border-radius: var(--radius-panel);
+      background: var(--color-surface);
+    }
+
+    summary {
+      min-height: var(--space-12);
+      padding: var(--space-3) var(--space-5);
+      color: var(--color-accent);
+      cursor: pointer;
+    }
+
+    .mobile-navigation-content {
+      padding: var(--space-4) var(--space-5) var(--space-6);
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .article-header {
+      margin-bottom: var(--space-8);
+      padding-bottom: var(--space-8);
+    }
+
+    .reading-content :global(h2) {
+      margin-top: var(--space-12);
+    }
+  }
+</style>

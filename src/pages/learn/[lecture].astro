@@ -1,0 +1,23 @@
+---
+import LectureLayout from '../../layouts/LectureLayout.astro';
+import type { Lecture } from '../../data/course';
+import { lectures } from '../../data/course';
+
+export function getStaticPaths() {
+  return lectures.map((lecture) => ({
+    params: { lecture: lecture.frontmatter.slug },
+    props: { lecture },
+  }));
+}
+
+interface Props {
+  lecture: Lecture;
+}
+
+const { lecture } = Astro.props;
+const Content = lecture.Content;
+---
+
+<LectureLayout lecture={lecture}>
+  <Content />
+</LectureLayout>

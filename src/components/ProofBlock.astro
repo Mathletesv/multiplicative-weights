@@ -1,0 +1,27 @@
+---
+/** Native disclosure; no proof text or interaction logic is supplied here. */
+---
+
+<details class="proof-block">
+  <summary>Proof</summary>
+  <div class="proof-content"><slot /></div>
+</details>
+
+<style>
+  .proof-block {
+    border-block: 1px solid var(--color-rule);
+  }
+
+  summary {
+    min-height: var(--space-16);
+    padding: var(--space-5) var(--space-2);
+    color: var(--color-accent);
+    font-family: var(--font-interface);
+    font-size: var(--text-ui);
+    cursor: pointer;
+  }
+
+  .proof-content {
+    padding-bottom: var(--space-6);
+  }
+</style>

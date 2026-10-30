@@ -1,0 +1,72 @@
+---
+import type { Lecture } from '../data/course';
+import { lecturePath, lectureNumber } from '../data/course';
+import { sitePath } from '../lib/paths';
+
+interface Props {
+  previous?: Lecture;
+  next?: Lecture;
+}
+
+const { previous, next } = Astro.props;
+---
+
+<nav class="pagination" aria-label="Section navigation">
+  <a class="previous" href={previous ? lecturePath(previous) : sitePath('#sections')}>
+    <span class="eyebrow">← {previous ? `Section ${lectureNumber(previous)}` : 'Course outline'}</span>
+    {previous && <span class="link-title">{previous.frontmatter.title}</span>}
+  </a>
+  <a class="next" href={next ? lecturePath(next) : sitePath('#sections')}>
+    <span class="eyebrow">{next ? `Section ${lectureNumber(next)}` : 'Course outline'} →</span>
+    {next && <span class="link-title">{next.frontmatter.title}</span>}
+  </a>
+</nav>
+
+<style>
+  .pagination {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-8);
+    margin-top: var(--space-16);
+    border-top: 1px solid var(--color-rule);
+    padding-top: var(--space-8);
+  }
+
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-height: var(--space-12);
+    text-decoration: none;
+  }
+
+  a:hover .link-title {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .eyebrow {
+    color: var(--color-accent);
+  }
+
+  .link-title {
+    font-family: var(--font-reading);
+    font-size: var(--text-body);
+    line-height: 1.35;
+  }
+
+  .next {
+    text-align: right;
+  }
+
+  @media (max-width: 40rem) {
+    .pagination {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6);
+    }
+
+    .next {
+      text-align: left;
+    }
+  }
+</style>

@@ -1,0 +1,30 @@
+---
+/** Empty authoring space. Replace its invocation with owner-authored content. */
+interface Props {
+  label?: string;
+}
+
+const { label = 'Content' } = Astro.props;
+---
+
+<div class="content-slot" role="note" aria-label={`${label} placeholder`}>
+  <span>{label}</span>
+</div>
+
+<style>
+  .content-slot {
+    min-height: var(--slot-height);
+    border: 1px dashed var(--color-control-border);
+    border-radius: var(--radius-panel);
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-surface);
+  }
+
+  span {
+    color: var(--color-muted);
+    font-family: var(--font-interface);
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+</style>
