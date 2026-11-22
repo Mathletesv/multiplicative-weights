@@ -1,9 +1,104 @@
 ---
 order: 1
 slug: experts
-title: Learning From Experts
+title: Introduction
+math: typst
 ---
 
-import ContentSlot from '../../components/ContentSlot.astro';
+import ExpertGame from '../../components/experts/ExpertGame.svelte';
+import RegretReplay from '../../components/experts/RegretReplay.svelte';
 
-<ContentSlot />
+# Unreliable Experts
+
+Consider the following situation. You are given a sequence of $T$ conjectures, one by one.
+After being given conjecture $t$, you must respond with whether you think it is true or false. If you are correct, you get a point.
+Unfortunately, you have lost your intuition, but fortunately there is a set of $N$ experts, each of which provides their opinion on the decision.
+Before deciding, you can see if each of these experts thinks it is true.
+After deciding, you can see how all of the experts performed.
+The goal is to make as few mistakes as possible.
+
+To gain some intuition for how we might hope to optimize this, try the following games.
+
+In the following game, 2 of the experts are always correct, the other 8 are completely random.
+
+<ExpertGame preset="reliable-experts" collapsible client:visible />
+
+In the next game, each expert has an accuracy drawn from the normal distribution.
+
+<ExpertGame preset="mixed-accuracy" recordForReplay collapsible client:visible />
+
+In the first setting, it is clear that a reasonable strategy is to go with the majority of currently flawless experts.
+Every time the majority of flawless experts is wrong, at most half of the previously flawless experts were correct, which means the set of flawless experts shrinks exponentially
+with the number of mistakes the algorithm makes. So as long as there is one flawless expert, the number of mistakes is logarithmic in $N$.
+But it is very rare that there are perfect experts, and if all experts are flawed then this algorithm will eventually be left with no flawless expert to follow.
+
+It is much less clear what the right approach to the second game is.
+First, we must precisely determine what our goal should be.
+If all of the experts are random coin flips, we should not expect our algorithm to do better than a coin flip either.
+But if all of the experts are mosly correct, then we want our algorithm to also be mostly correct.
+We will capture this with the goal of minimizing regret.
+We will also generalize the situation to involve arbitrary decisions instead of boolean ones, 
+so the error of a decision will be captured by a loss function that takes values in $[0, 1]$.
+
+# The Problem
+
+Let $T$ be the number of decisions and $N$ be the number of experts as before. 
+
+Let $ell_t : [N] -> [0, 1]$ be the loss function of each expert for decision $t$. 
+
+On decision $t$, we may use any of the loss functions $ell_r$ for $r < t$ to determine our strategy.
+In some cases we may want to use randomness, such as for the first decision if all of the experts are split evenly.
+
+Let $p_t : [N] -> [0, 1], sum_(i = 1)^N p_t (i) = 1$ be the probability distribution our strategy chooses to determine which expert we follow for decision $t$.
+Then the loss of our strategy on decision $t$ is $p_t dot ell_t$, which is the expected value of our loss if we choose an expert by our probability distribution.
+
+Formally, we seek to design an algorithm to minimize the following, which we refer to as the regret of our algorithm.
+```typst
+$ sum_(t = 1)^T p_t dot ell_t - min_(i in [N]) sum_(t = 1)^T ell_t (i) $
+```
+The term we are subtracting is the minimum total cost of all $T$ decisions of a single expert, which is what our cost would be if we could
+see the future and then were forced to choose exactly 1 expert to follow for all $T$ decisions.
+In other words, this would be our minimum cost if our strategy was to pick 1 expert and stay with them the whole time,
+and then we got very lucky and selected the expert who minimizes the cost of this strategy.
+
+The following widget allows you to replay the second widget from earlier, this time with your regret displayed over time along with the loss of the best expert in hindsight.
+<RegretReplay client:visible />
+
+Here are a few more examples of situations which we hope to design an algorithm for.
+The first is detailed formally and the other two will be detailed in later pages.
+
+<DisclosureBlock id="weather-forecasting">
+  <span slot="summary">Weather Forecasting</span>
+
+Suppose each day there are the same $N$ weather forecasters predicting certain likelihoods of rain between $0$ and $1$.
+Assuming news source $n$ says the probability of rain is $q_n$ on day $t$, the loss will be $ell_t (n) = 1 - q_n$ if it rains, $ell_t (n) = q_n$ otherwise.
+
+Each day t, you must select a probability distribution $p_t$ which will be used to decide which news source you follow.
+Your loss will be the same as the loss of the news source you follow.
+But in expectation, your loss will be $p_t dot ell_t$.
+
+How should you choose your probability distribution each day so that your cumulative expected loss stays close to the best fixed forecaster in hindsight?
+</DisclosureBlock>
+
+<DisclosureBlock id="dodgeball">
+  <span slot="summary">Dodgeball</span>
+
+Suppose you are playing dodgeball with your friend, and you intend to play many times.
+You can either throw the ball right at him, at his left, or at his right.
+You then see where your friend dodges and can use this information to help determine future play.
+This problem can be modeled as an instance of choosing between these 3 decisions with a loss of 1 if you miss.
+How should your strategy evolve over time to win as much as possible?
+</DisclosureBlock>
+
+<DisclosureBlock id="network-flow">
+  <span slot="summary">Bandwidth Distribution</span>
+
+A streaming provider needs to stream the finals of the World Cup to hundreds of cities.
+Each city needs a certain amount of bandwidth.
+The provider can split a city's traffic across several routes, but routes to different cities can share the same fiber link.
+How should the provider route the traffic so every city gets enough and the busiest link has as much spare capacity as possible?
+</DisclosureBlock>
+
+In the following page we will detail the multiplicative weights algorithm, which performs well in all of these situations.
+Not only does it perform well, but in the most general setting it is asymptotically optimal, in that for any online algorithm,
+there exists a sequence of losses on which it performs asymptotically at least as bad as multiplicative weights' worst case regret.

@@ -1,0 +1,207 @@
+---
+order: 2
+slug: multiplicative-weight-updates
+title: Multiplicative Weight Updates
+math: typst
+---
+
+import ExpertGame from '../../components/experts/ExpertGame.svelte';
+import WeightSimulation from '../../components/experts/WeightSimulation.svelte';
+
+# Problem
+
+We have a sequence of $T$ decisions, and $N$ experts. 
+Each decision $t$ has a corresponding loss function $ell_t : [N] -> [0, 1]$ where $ell_t (i)$ is the cost of expert $i$ in decision $t$.
+We seek an algorithm for decision making that performs as closely as possible to an expert with the minimal overall loss in hindsight.
+Note that this algorithm must be online, in the sense that it can only use information from before decision $t$
+when choosing decision $t$.
+
+Naturally, at every step we want to try to somehow rely less on the experts who have performed poorly in the past.
+But we do not want to immediately eliminate experts, as they may get unlucky.
+We also never want to count an expert out, because they may improve over time.
+The multiplicative weights algorithm formalizes this intuition precisely by randomly choosing an expert based on weights
+and lowering the weights of experts based on the costs of their decisions.
+This algorithm performs asymptotically optimally in the general case where the costs of each decision may be chosen in any manner, 
+even adversarially. Note that this means the algorithm's strategy is known and used by the adversary,
+but the costs must still be fixed before the strategy resolves its choice.
+
+# Algorithm
+
+As before we have a sequence of $T$ decisions, and $N$ experts. 
+We have our loss functions $ell_t : [N] -> [0, 1]$ and will define probability distributions $p_t : [N] -> [0, 1]$ and weights $omega_t : [N] -> [0, 1]$.
+Also, we will denote the potential $Phi_t = sum_(i = 1)^N omega_t (i)$.
+We also choose a learning parameter $epsilon > 0$.
+
+To start, $forall i in [N], omega_1 (i) = 1$.
+
+For each round $t = 1,dots,T$
+  1. Set $p_t (i) = (omega_t (i)) / (Phi_t)$.
+  2. Choose $i$ from the probability distribution $p_t$.
+  3. Observe the losses $ell_t$ and incur the loss $ell_t (i)$.
+  4. For $i in [N]$, set $omega_(t + 1) (i) = omega_t (i) e^(-epsilon ell_t (i))$
+
+$p_t$ always remains a probability distribution since $sum_(i = 1)^N p_t (i) = sum_(i = 1)^N (omega_t (i))/Phi_t = 1/Phi_t Phi_t = 1$ and $omega_t (i), Phi_t > 0$.
+
+Note that if $epsilon$ is large, the weights will decay faster.
+So increasing $epsilon$ causes round $t$ to have more probability concentrated on the experts with lower cumulative loss prior to round $t$.
+
+We will interchangeably treat $ell_t$ as a $N$-element vector and a function $[N] -> [0, 1]$ for convenience in notation.
+
+The following widget shows this algorithm in action. Keep in mind that the cumulative loss it displays is not the expected regret.
+But the expected cumulative loss minus the minimum cumulative loss of an expert is the expected regret.
+
+<WeightSimulation client:visible />
+
+# Regret Upper Bound
+
+<TheoremBlock id="mw-upper-bound">
+For any $epsilon > 0$, running the multiplicative weights algorithm with learning parameter $epsilon$ achieves
+$$
+sum_(t = 1)^T p_t dot ell_t - min_(i in [N]) sum_(t = 1)^T ell_t (i) <= T epsilon + ln(N)/epsilon
+$$
+For $N >= 2, T >= 1$, choosing $epsilon = sqrt(ln(N)/T)$ yields an upper bound of $2sqrt(T ln(N))$.
+</TheoremBlock>
+
+The general approach for the proof will be to analyze the decay of $Phi_t$ and bound $Phi_(T + 1)$ on both sides.
+We know $Phi_1 = N$ is the sum of the initial weights since they all start at $1$.
+Note that $Phi_(T + 1)$ is the sum of the weights after round $T$ concludes.
+If the MW algorithm gets higher expected loss, then we expect $Phi_t$ will decay by a larger fractional drop.
+For small $epsilon$, an expert with loss $ell_t (i)$ loses roughly an $epsilon ell_t (i)$ fraction of its weight.
+Since $p_t$ is distributed by weight, this gives a total fractional drop in $Phi_t$ by approximately $epsilon p_t dot ell_t$.
+
+Additionally, we know that $Phi_t >= omega_t (i)$ for any $t, i$ since all weights stay positive as the update always multiplies by a positive factor.
+This also means $Phi_t > 0$ always, which we will use to divide by it.
+We can rewrite $omega_(T + 1)$ by combining the recursive product updates
+$$
+  Phi_(T + 1) &>= omega_(T + 1) (i) \
+    &= product_(t = 1)^T e^(-epsilon ell_t (i)) \
+    &= exp(-epsilon sum_(t = 1)^T ell_t (i))
+$$
+This will be the lower bound used in the proof.
+Note that for a fixed $i$, this lower bounds $Phi_(T + 1)$ by a function of the total loss of expert $i$.
+
+We will use two standard inequalities which can be proved using Taylor's theorem.
+The first is true for any $x in RR$ and the second requires $x >= 0$.
+1. $1 + x <= e^x$
+2. $e^(-x) <= 1 - x + x^2$
+
+<ProofBlock id="mw-ub-proof" for="mw-upper-bound">
+<span slot="summary">Proof</span>
+
+We start by expanding and upper bounding $Phi_(t +1)$
+$$
+Phi_(t + 1) &= sum_(i = 1)^N omega_(t + 1) (i) && ("Definition of " Phi_(t + 1)) \
+  &= sum_(i = 1)^N omega_t (i) e^(-epsilon ell_t (i)) && ("Update of " omega_(t + 1)) \
+  &<= sum_(i = 1)^N omega_t (i) (1 - epsilon ell_t (i) + epsilon^2 ell_t (i)^2) && ("Inequality 2") \
+  &<= sum_(i = 1)^N omega_t (i) (1 - epsilon ell_t (i) + epsilon^2) && (0 <= ell_t (i) <= 1) \
+  &= (1 + epsilon^2) sum_(i = 1)^N omega_t (i) - epsilon sum_(i = 1)^N omega_t (i) ell_t (i) && ("Distributing") \
+  &= (1 + epsilon^2) Phi_t - epsilon Phi_t sum_(i = 1)^N (omega_t (i))/Phi_t ell_t (i) && ("Substituting the first term, multiplying second term by " Phi_t/Phi_t) \
+  &= (1 + epsilon^2) Phi_t - epsilon Phi_t sum_(i = 1)^N p_t (i) ell_t (i) && (p_t (i) = (omega_t (i))/Phi_t "by the algorithm")\
+  &= (1 + epsilon^2) Phi_t - epsilon Phi_t p_t dot ell_t && ("Rewriting sum as dot product") \
+  &= Phi_t (1 + epsilon^2 - epsilon p_t dot ell_t) && ("Factoring") \
+  &<= Phi_t exp(epsilon^2 - epsilon p_t dot ell_t) && ("Inequality 1")
+$$
+As a result, we get
+$$
+  Phi_(T + 1) &<= Phi_1 product_(t = 1)^T exp(epsilon^2 - epsilon p_t dot ell_t) && ("Applying the bound" T "times") \
+    &= Phi_1 exp(epsilon^2 T - epsilon sum_(t = 1)^T p_t dot ell_t) \
+    &= N exp(epsilon^2 T - epsilon sum_(t = 1)^T p_t dot ell_t) && (Phi_1 = N "by all initial weights" 1)
+$$
+
+Using the lower bound from $Phi_(T + 1) >= omega_(T + 1) (i)$ yields that for any $i in [N]$,
+$$
+  exp(-epsilon sum_(t = 1)^T ell_t (i)) <= Phi_(T + 1) <= N exp(epsilon^2 T - epsilon sum_(t = 1)^T p_t dot ell_t)
+$$
+Taking the logarithm on both sides,
+$$
+  -epsilon sum_(t = 1)^T ell_t (i) &<= ln(N) + epsilon^2 T - epsilon sum_(t = 1)^T p_t dot ell_t \
+  ==> - sum_(t = 1)^T ell_t (i) &<= ln(N)/epsilon + epsilon T - sum_(t = 1)^T p_t dot ell_t && ("Divide by" epsilon) \
+  ==> sum_(t = 1)^T p_t dot ell_t - sum_(t = 1)^T ell_t (i) &<= epsilon T + ln(N)/epsilon && ("Rearrange")
+$$
+Choosing $i$ s.t. $sum_(t = 1)^T ell_t (i)$ is minimal, the above still holds so
+$$
+  sum_(t = 1)^T p_t dot ell_t - min_(i in [N]) sum_(t = 1)^T ell_t (i) <= ln(N)/epsilon + T epsilon
+$$
+This is the bound we desired, and note that it is quite strong. On the right side, the first term increases as $epsilon$ decreases,
+and the second term increases as $epsilon$ increases. Choosing $epsilon = sqrt(ln(N)/T)$ sets them equal at $sqrt(T ln(N))$, giving us
+$$
+  sum_(t = 1)^T p_t dot ell_t - min_(i in [N]) sum_(t = 1)^T ell_t (i) <= 2sqrt(T ln(N))
+$$
+</ProofBlock>
+
+So we can choose the learning rate to ensure that the total regret increases by a square root factor of $T$.
+First fixing $N$, this tells us that for example if we multiply the number of decisions by $100$, we only expect $10$ times more regret.
+But what this means is that on average per decision, our regret is $1/10$th of what it was before. 
+In general, the average regret per decision is bounded by $2sqrt(T ln(N))/T = 2sqrt(ln(N)/T)$, which shrinks as $T$ increases.
+
+Furthermore, if we fix $T$, this regret increases by a square root of log factor of $N$, so even with many more experts
+we still expect to do almost as well as the best fixed expert in hindsight.
+
+# General Regret Lower Bound
+
+Not only does multiplicative weights perform well in general,
+it actually performs asymptotically optimally when there are no constraints on the losses.
+We can show that for any online algorithm that seeks to minimize regret, there exists
+a choice of loss functions for which the algorithm cannot do asymptotically better than multiplicative weights.
+
+<ExpertGame preset="coin-flip-experts" collapsible client:visible />
+
+<TheoremBlock id="general-lower-bound">
+For any online decision making algorithm given $N >= 2$ decisions and $T$ steps,
+there exists a sequence $ell_1, dots, ell_T in [0, 1]^N$ of loss functions such that
+$min_(i in [N]) sum_(t = 1)^N ell_t (i) = Omega(T)$ and if the algorithm chooses decision distributions
+$p_1, dots, p_T$, then
+$$
+  sum_(t = 1)^T p_t dot ell_t - min_(i in [N]) sum_(t = 1)^T ell_t (i) >= Omega(sqrt(T ln(N)))
+$$
+</TheoremBlock>
+
+The approach to prove this will be to construct a scenario where no algorithm can do better than coin flips,
+and then upper bound the minimum regret using the [probabilistic method](https://math.bme.hu/~gabor/oktatas/SztoM/AlonSpencer.ProbMethod3ed.pdf).
+
+Some tools from probability are used in this proof, all of which will certainly be discussed in an introductory probability course such as 
+[this one](https://www.math.cmu.edu/~gautam/c/2026-425/notes/index.html) with the exception of the following lemma, which we will state without proof
+
+Concentration Lemma: Let $X ~ "Binom(T, 1/2)"$ and $a in [0, T/8]$. Then
+$$
+  P[X <= T/2 - a] >= 1/15 e^(-16 a^2/T)
+$$
+
+
+<ProofBlock id="lb-proof" for="general-lower-bound">
+<span slot="summary">Proof</span>
+
+Given $R$ decisions total, let $T = max{1, floor(R/2)}$ be the first half of the decisions and $N >= 2$ experts.
+We will first work with just the first $T$ decisions. We set the loss of expert $1$ to be $1/2$ for every decisions.
+For $i > 1$, for each decision $t$, its loss is determined by a fair coin flip $0$ for tails, $1$ for heads (If you know probability this is a Bernoulli($1/2$) random variable).
+So the expected loss for any decision is $1/2$.
+
+Taking the expected value of the entire process, 
+$$
+  E (sum_(t = 1)^T p_t dot ell_t) &= sum_(t = 1)^T E (p_t dot ell_t) && "By linearity of expectation" \
+    &= sum_(t = 1)^T p_t dot E (ell_t) && "Since $p_t$ is constant"\
+    &= sum_(t = 1)^T p_t dot 1/2 \
+    &= T/2 && "By $p_t dot 1/2 = 1/2$ since $p_t$ is a probability distribution"
+$$
+For every $i$, let $X_i = sum_(t = 1)^T ell_t (i)$, note that $X_1 = T/2$ and for $i > 1$, $X_i ~ "Binom"(T, 1/2)$.
+
+The concentration inequality with $a = min{T/8, 1/4 sqrt(T ln N)}$ yields 
+$$
+  P[x_i > T/2 - t] &<= 1 - 1/15 e^(-16 a^2/T) \
+    &<= 1 - 1/15 e^(-16/T (1/4 sqrt(T ln(N))^2)) \
+    &= 1 - 1/15 e^(-ln(N)) \
+    &= 1 - 1/(15N) 
+$$
+Now we can take the minimum
+$$
+  P[min_(i in [N]) X_i > T/2 - t] &= product_(i = 2)^N P[X_i > T/2 - t] && "By independence and $X_1 = T/2$" \
+  &<= (1 - 1/(15N))^(N - 1) \
+  &<= e^(-(N - 1)/(15N)) \
+  &<= e^(-1/30)
+$$
+
+
+For the remaining decisions after $T$, we set the loss of every expert to be $1$.
+</ProofBlock>
+
+

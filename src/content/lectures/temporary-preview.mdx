@@ -1,0 +1,106 @@
+---
+order: 5
+slug: temporary-preview
+title: Temporary Preview
+math: typst
+---
+
+{/* Temporary visual preview: lorem ipsum and test equations, not lecture material. */}
+
+## Block preview
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+Lorem ipsum dolor sit amet, **consectetur adipiscing elit**, sed do eiusmod tempor incididunt. Inline mathematics: $a^2 + b^2 = c^2$, $p_i = frac(w_i, sum_j w_j)$, and $eta in (0,1)$.
+
+<BlockRef target="result" /> · <BlockRef target="proof" /> · <BlockRef target="nested-hint" /> · <BlockRef target="deep-step">Nested proof step</BlockRef> · <BlockRef target="sum-equation" />
+
+<TheoremBlock id="result" title="Lorem ipsum">
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet.
+
+$$
+sum_(i=1)^n x_i^2 >= 0.
+$$
+
+</TheoremBlock>
+
+<StatementBlock id="notation" kind="definition" title="Dolor sit amet">
+
+Lorem ipsum dolor sit amet. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum. Test notation: $x=(x_1, ..., x_n)$.
+
+</StatementBlock>
+
+<StatementBlock id="problem" kind="exercise">
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id dolor id nibh ultricies vehicula ut id elit.
+
+</StatementBlock>
+
+## Proofs and hints
+
+<ProofBlock id="proof" for="result">
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ullamcorper nulla non metus auctor fringilla. Maecenas faucibus mollis interdum.
+
+```typst
+$ (a + b)^2 = a^2 + 2 a b + b^2 $
+```
+
+<HintBlock id="nested-hint" for="problem">
+
+Lorem ipsum dolor sit amet. Cras mattis consectetur purus sit amet fermentum.
+
+<NoteBlock id="deep-step" title="Nested proof step">
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum id ligula porta felis euismod semper. Test expression: $x+1$.
+
+</NoteBlock>
+
+</HintBlock>
+
+Lorem ipsum dolor sit amet. Etiam porta sem malesuada magna mollis euismod.
+
+</ProofBlock>
+
+<HintBlock id="second-hint" for="problem">
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+
+</HintBlock>
+
+<HintBlock id="open-hint" for="problem" open>
+  <span slot="summary">Custom summary · initially open</span>
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+
+</HintBlock>
+
+## Typst equations
+
+```typst id="sum-equation" alt="The sum of x sub i from i equals one through n."
+$ sum_(i=1)^n x_i $
+```
+
+```typst id="fraction-equation"
+$ (a + b) / (1 + c^2) $
+```
+
+```typst id="aligned-equation" alt="An aligned test derivation: f of x equals x squared plus two x plus one, which equals the square of x plus one."
+$ f(x) &= x^2 + 2 x + 1 \
+       &= (x + 1)^2 $
+```
+
+<TypstBlock id="component-equation" code="$ x + 1 $">
+  <span slot="alternative">x plus one</span>
+</TypstBlock>
+
+## Wide equation and block links
+
+```typst id="wide-equation" alt="A test sum of the variables x sub one through x sub twenty."
+$ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10 + x_11 + x_12 + x_13 + x_14 + x_15 + x_16 + x_17 + x_18 + x_19 + x_20 $
+```
+
+<BlockRef target="temporary-preview/result" /> · <BlockRef target="temporary-preview/proof" /> · <BlockRef target="temporary-preview/deep-step">Open the nested step</BlockRef> · <BlockRef target="temporary-preview/aligned-equation" />
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed posuere consectetur est at lobortis. Donec id elit non mi porta gravida at eget metus.
