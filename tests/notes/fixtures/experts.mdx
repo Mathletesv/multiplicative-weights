@@ -1,0 +1,90 @@
+---
+order: 1
+slug: experts
+title: Learning From Experts
+---
+
+import TheoremBlock from '../../../src/components/TheoremBlock.astro';
+import ExpertGame from '../../../src/components/experts/ExpertGame.svelte';
+import RegretReplay from '../../../src/components/experts/RegretReplay.svelte';
+
+# Fixture chapter
+
+## Fixture overview
+
+Lorem ipsum dolor sit amet. Inline math: $a^2 + b^2 = c^2$.
+
+<BlockRef target="result" /> · <BlockRef target="proof" /> · <BlockRef target="deep-step" /> · <BlockRef target="games/other-result">Cross-note fixture</BlockRef>
+
+<TheoremBlock id="result" title="Lorem ipsum">
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+$$
+x^2
+$$
+
+$$
+x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_{10} + x_{11} + x_{12}
+$$
+
+</TheoremBlock>
+
+<StatementBlock id="problem" kind="exercise">
+
+Lorem ipsum dolor sit amet.
+
+</StatementBlock>
+
+<ProofBlock id="proof" for="result">
+  <span slot="summary">Custom proof summary</span>
+
+Lorem ipsum proof fixture.
+
+<HintBlock id="nested-hint" for="problem">
+
+<NoteBlock id="deep-step" title="Nested fixture">
+
+Lorem ipsum nested fixture.
+
+</NoteBlock>
+
+</HintBlock>
+
+</ProofBlock>
+
+<HintBlock id="second-hint" for="problem">
+
+Lorem ipsum second hint fixture.
+
+</HintBlock>
+
+```typst id="sum-equation" alt="The sum of x sub i from i equals one through n."
+$ sum_(i=1)^n x_i $
+```
+
+```typst id="semantic-equation" tex='\frac{a}{b}'
+$ a / b $
+```
+
+<TypstBlock id="component-equation" code="$ x + 1 $">
+  <span slot="alternative">x plus one</span>
+</TypstBlock>
+
+```typst id="wide-equation" alt="A wide mathematical fixture."
+#box(width: 900pt)[$ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10 $]
+```
+
+```typst-source
+$ x^2 $
+```
+
+<TheoremBlock number={7}>Legacy theorem fixture.</TheoremBlock>
+
+<ProofBlock>Legacy proof fixture.</ProofBlock>
+
+<ExpertGame preset="reliable-experts" collapsible client:visible />
+
+<ExpertGame preset="mixed-accuracy" recordForReplay collapsible client:visible />
+
+<RegretReplay client:visible />

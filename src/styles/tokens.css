@@ -1,16 +1,20 @@
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
 
-  --color-paper: #faf9f6;
-  --color-surface: #fff;
-  --color-ink: #202522;
-  --color-muted: #5d665f;
-  --color-accent: #276451;
-  --color-accent-hover: #1b4b3b;
-  --color-accent-soft: #edf2ed;
-  --color-rule: #e3e5de;
-  --color-control-border: #808a82;
-  --color-focus: #2457c5;
+  --color-ink-light: #202522;
+  --color-ink-dark: #e8ede7;
+  --color-ink: light-dark(var(--color-ink-light), var(--color-ink-dark));
+  --color-paper: light-dark(#faf9f6, #151b18);
+  --color-surface: light-dark(#fff, #1e2722);
+  --color-muted: light-dark(#5d665f, #aab8af);
+  --color-accent: light-dark(#276451, #91cdb2);
+  --color-accent-hover: light-dark(#1b4b3b, #b8e2cd);
+  --color-accent-soft: light-dark(#edf2ed, #273b31);
+  --color-rule: light-dark(#e3e5de, #36463d);
+  --color-control-border: light-dark(#808a82, #758c7e);
+  --color-focus: light-dark(#2457c5, #9bbcff);
+  --color-box-red: light-dark(#a33342, #f3a1ad);
+  --color-box-blue: light-dark(#2e5289, #a2bffa);
 
   --font-reading: Georgia, 'Times New Roman', serif;
   --font-interface: system-ui, sans-serif;
@@ -39,7 +43,6 @@
   --space-20: 5rem;
   --space-24: 6rem;
 
-  --width-prose: 68ch;
   --width-rail: 12rem;
   --gutter: clamp(1rem, 2vw, 2rem);
   --layout-gap: clamp(1.5rem, 2.5vw, 2.5rem);
@@ -47,4 +50,11 @@
   --motion-duration: 140ms;
   --slot-height: 6rem;
   --slot-height-statement: 9rem;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+@media print {
+  :root, :root[data-theme] { color-scheme: light; }
 }

@@ -1,0 +1,55 @@
+---
+interface Props {
+  mathml: string;
+  display?: boolean;
+}
+
+const { mathml, display } = Astro.props;
+---
+
+{display ? (
+  <div class="typst-display" data-proof-math>
+    <div class="equation" set:html={mathml} />
+  </div>
+) : <Fragment set:html={mathml} />}
+
+<style>
+  .typst-display {
+    overflow-x: auto;
+    padding-block: var(--space-2);
+  }
+
+  .equation {
+    inline-size: max-content;
+    min-inline-size: 100%;
+    /* Let block MathML center each line inside the horizontal scroll area. */
+    white-space: nowrap;
+  }
+
+  /* The Typst fragment supplies the table. Its standalone HTML stylesheet
+     normally supplies these alignment and display-style rules. */
+  .equation :global(mtable.multiline-equation) {
+    math-style: inherit;
+  }
+
+  .equation :global(mtable.multiline-equation > mtr > mtd) {
+    math-depth: inherit;
+    math-style: inherit;
+    math-shift: inherit;
+    padding: 0;
+  }
+
+  .equation :global(mtable.multiline-equation > mtr + mtr > mtd) {
+    padding-block-start: var(--space-2);
+  }
+
+  .equation :global(mtable.aligned > mtr > mtd:nth-child(odd)) {
+    justify-items: end;
+    text-align: right;
+  }
+
+  .equation :global(mtable.aligned > mtr > mtd:nth-child(even)) {
+    justify-items: start;
+    text-align: left;
+  }
+</style>

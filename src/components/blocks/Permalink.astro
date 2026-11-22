@@ -1,0 +1,23 @@
+---
+import { blockPath } from '../../lib/notes/registry';
+import { sitePath } from '../../lib/paths';
+import type { BlockRecord } from '../../lib/notes/types';
+
+interface Props { block?: BlockRecord }
+const { block } = Astro.props;
+---
+
+{block ? (
+  <a href={sitePath(blockPath(block))} title="Permalink" data-copy-block-link><slot /></a>
+) : <slot />}
+
+<style>
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover, a:focus-visible {
+    text-decoration: underline;
+  }
+</style>

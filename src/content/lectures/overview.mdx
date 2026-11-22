@@ -5,6 +5,19 @@ title: Overview
 math: typst
 ---
 
+# Motivation
+
+Suppose you are given a set of experts and have to choose a sequence of decisions, where in each decision you must choose an expert to follow.
+After every decision, you learn how all of the experts performed. Your goal is to do as well as possible,
+and in particular at the end of all of the decisions you would like to have performed almost as well as the best expert in hindsight.
+Using the multiplicative weight updates algorithm, you can get a good bound on the gap between your performance and the best expert.
+Furthermore, this same algorithm can be applied to find approximately optimal strategies in zero-sum games,
+to approximately optimize a set of linear constraints, and much more.
+
+In many areas of complexity theory, we find that reductions between different problems and models enable
+novel approaches and results. The problem which the multiplicative weights algorithm addresses is one which
+many scenarios can be reduced to, some more obviously than others.
+
 # Prerequisites
 
 Learning the multiplicative weights algorithm requires primarily a willingness to deal precisely with algebra, logic, and basic probability.

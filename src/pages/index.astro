@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CourseIndex from '../components/CourseIndex.astro';
-import { lectures, lecturePath } from '../data/course';
+import { lectures, lecturePath, lectureNumber } from '../data/course';
 ---
 
 <BaseLayout>
@@ -14,7 +14,7 @@ import { lectures, lecturePath } from '../data/course';
       </div>
     </div>
     <a class="start-link" href={lecturePath(lectures[0])}>
-      Start with section 01 <span aria-hidden="true">→</span>
+      Start with section {lectureNumber(lectures[0])} <span aria-hidden="true">→</span>
     </a>
   </section>
 

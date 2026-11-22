@@ -1,0 +1,12 @@
+---
+import { referenceMetadata } from './metadata';
+import { blockPath } from '../../lib/notes/registry';
+import { sitePath } from '../../lib/paths';
+
+/** Empty default slot generates a label; a supplied slot preserves custom wording. */
+interface Props { target: string; __note?: string }
+const { target, __note } = Astro.props;
+const block = referenceMetadata(target, __note);
+---
+
+<a href={sitePath(blockPath(block))} data-block-ref={block.key}><slot>{block.label}</slot></a>

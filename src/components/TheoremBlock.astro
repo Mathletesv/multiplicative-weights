@@ -1,32 +1,8 @@
 ---
-/** Presentation only; the statement is provided through the default slot. */
-interface Props {
-  number: number;
-}
+import StatementBlock from './blocks/StatementBlock.astro';
+import type { BlockIdentity } from './blocks/metadata';
 
-const { number } = Astro.props;
+interface Props extends BlockIdentity { number?: number; title?: string }
 ---
 
-<div class="theorem-block">
-  <p class="eyebrow">Theorem {String(number).padStart(2, '0')}</p>
-  <div class="statement"><slot /></div>
-</div>
-
-<style>
-  .theorem-block {
-    border: 1px solid var(--color-rule);
-    border-left: 3px solid var(--color-accent);
-    border-radius: var(--radius-panel);
-    padding: var(--space-6);
-    background: var(--color-accent-soft);
-  }
-
-  .eyebrow {
-    margin-bottom: var(--space-5);
-    color: var(--color-accent);
-  }
-
-  .statement {
-    --slot-height: var(--slot-height-statement);
-  }
-</style>
+<StatementBlock {...Astro.props} kind="theorem"><slot /></StatementBlock>

@@ -1,0 +1,11 @@
+---
+import DisclosureBlock from './blocks/DisclosureBlock.astro';
+import type { BlockIdentity } from './blocks/metadata';
+
+interface Props extends BlockIdentity { id: string; for?: string; open?: boolean }
+---
+
+<DisclosureBlock {...Astro.props} kind="hint">
+  {Astro.slots.has('summary') && <slot name="summary" slot="summary" />}
+  <slot />
+</DisclosureBlock>

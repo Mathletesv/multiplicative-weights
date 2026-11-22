@@ -1,0 +1,71 @@
+<button class="theme-toggle" type="button" hidden data-theme-toggle aria-label="Dark mode" aria-pressed="false">
+  <span class="moon" aria-hidden="true"></span>
+  <span class="sun" aria-hidden="true"></span>
+</button>
+
+<style>
+  .theme-toggle:not([hidden]) {
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .theme-toggle {
+    inline-size: var(--space-12);
+    block-size: var(--space-12);
+    padding: 0;
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+    color: var(--color-accent);
+    cursor: pointer;
+    transition: background-color var(--motion-duration), border-color var(--motion-duration);
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+
+  .moon {
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+    border-radius: 50%;
+    box-shadow: -0.25rem 0.1875rem currentColor;
+    transform: translate(0.125rem, -0.09375rem);
+  }
+
+  .sun {
+    position: relative;
+    display: none;
+    place-items: center;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+  }
+
+  .sun::before {
+    content: '';
+    inline-size: 0.625rem;
+    block-size: 0.625rem;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+  }
+
+  .sun::after {
+    content: '';
+    position: absolute;
+    inline-size: 2px;
+    block-size: 2px;
+    border-radius: 50%;
+    box-shadow: 0 0.5625rem, 0 -0.5625rem, 0.5625rem 0, -0.5625rem 0,
+      0.4rem 0.4rem, -0.4rem 0.4rem, 0.4rem -0.4rem, -0.4rem -0.4rem;
+  }
+
+  .theme-toggle[aria-pressed="true"] .moon { display: none; }
+  .theme-toggle[aria-pressed="true"] .sun { display: grid; }
+
+  @media (forced-colors: active) {
+    .moon, .sun::after { forced-color-adjust: none; color: ButtonText; }
+  }
+
+  @media print { .theme-toggle:not([hidden]) { display: none; } }
+</style>

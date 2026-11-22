@@ -1,6 +1,9 @@
 ---
 import { sitePath } from '../lib/paths';
+import ThemeToggle from './ThemeToggle.astro';
 
+const searchPath = sitePath('search/');
+const onSearchPage = Astro.url.pathname.replace(/\/$/, '') === sitePath('search');
 ---
 
 <header class="site-header site-container">
@@ -8,9 +11,13 @@ import { sitePath } from '../lib/paths';
     <span class="monogram" aria-hidden="true">mw.</span>
     <span class="wordmark-title">Multiplicative weights</span>
   </a>
-  <nav aria-label="Main navigation">
-    <a href={sitePath('#sections')}>Sections</a>
-  </nav>
+  <div class="header-actions">
+    <nav aria-label="Main navigation">
+      <a href={sitePath('#sections')}>Sections</a>
+      <a href={searchPath} aria-current={onSearchPage ? 'page' : undefined}>Search</a>
+    </nav>
+    <ThemeToggle />
+  </div>
 </header>
 
 <style>
@@ -45,6 +52,12 @@ import { sitePath } from '../lib/paths';
     font-weight: 500;
   }
 
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+  }
+
   nav {
     display: flex;
     gap: var(--space-8);
@@ -60,6 +73,11 @@ import { sitePath } from '../lib/paths';
     text-decoration: none;
   }
 
+  nav a:hover, nav a[aria-current="page"] {
+    border-bottom-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
   @media (max-width: 40rem) {
     .site-header {
       min-height: var(--space-20);
@@ -71,6 +89,10 @@ import { sitePath } from '../lib/paths';
 
     nav {
       gap: var(--space-6);
+    }
+
+    .header-actions {
+      gap: var(--space-4);
     }
   }
 </style>

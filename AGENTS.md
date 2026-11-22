@@ -14,7 +14,9 @@ Never directly add or edit explanatory website text, including lesson prose, def
 
 Use `src/pages/` for routes, `src/content/` for owner-authored MDX, `src/data/` for the derived course index, `src/layouts/` for page shells, `src/components/` for Astro and Svelte components, `src/lib/` for TypeScript utilities and simulation logic, `src/styles/` for shared CSS, and `public/` for unprocessed assets. Lecture pages compose `LectureLayout.astro`, `ReadingLayout.astro`, and `BaseLayout.astro`, which includes KaTeX styles. Change shared design values in `src/styles/tokens.css`.
 
-Run `npm run check` for Astro, TypeScript, and Svelte diagnostics. `npm run build` runs those checks and generates `dist/`; `npm run preview` serves that output. No unit test framework or coverage threshold is configured yet. Add meaningful simulation tests when introducing algorithm behavior.
+Run `npm run check` for Astro, TypeScript, and Svelte diagnostics. `npm run build` runs those checks and generates `dist/`; `npm run preview` serves that output. `npm test` uses Node's test runner for note infrastructure and full fixture builds. `npm run test:browser` uses Playwright; install Chromium with `npx playwright install chromium`. Typst rendering/tests require version 0.15.1 on `PATH`. See `docs/note-authoring.md` for authoring and component contracts. No coverage threshold is configured. Add meaningful simulation tests when introducing algorithm behavior.
+
+Note infrastructure lives in `src/integrations/notes/` (build-only parsing and compilation), `src/lib/notes/` (shared rules), `src/components/blocks/` (presentation), and `src/scripts/` (browser enhancements). Tests use isolated copies of the application with neutral first-lecture fixtures; keep test content out of published lecture sources.
 
 ## Modularity and Design Changes
 

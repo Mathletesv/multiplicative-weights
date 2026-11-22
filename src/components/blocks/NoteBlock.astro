@@ -1,0 +1,19 @@
+---
+import { blockMetadata } from './metadata';
+import type { BlockIdentity } from './metadata';
+import Permalink from './Permalink.astro';
+
+interface Props extends BlockIdentity { id: string; title?: string }
+const { id, title } = Astro.props;
+const block = blockMetadata(Astro.props);
+---
+
+<div id={id} class="note-block note-target" data-note-block={block?.key} tabindex="-1">
+  {(title || block) && <p class="block-label"><Permalink block={block}>{title ?? block?.label}</Permalink></p>}
+  <slot />
+</div>
+
+<style>
+  .note-block { margin-block: var(--space-6); }
+  .block-label { margin-bottom: var(--space-3); }
+</style>

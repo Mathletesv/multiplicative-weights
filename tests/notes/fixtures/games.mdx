@@ -1,0 +1,49 @@
+---
+order: 3
+slug: games
+title: Two Player Games
+math: typst
+---
+
+import HiddenCoinExplorer from '../../../src/components/games/HiddenCoinExplorer.svelte';
+import MWUHider from '../../../src/components/games/MWUHider.svelte';
+
+<TheoremBlock id="other-result">
+
+Lorem ipsum cross-note fixture.
+
+$$
+  min_(p in Delta_N) max_(q in Delta_K) p^top A q = min_(p in Delta_N) max_(q in Delta_K) p^top A q
+$$
+
+</TheoremBlock>
+
+<BlockRef target="experts/result" /> · <BlockRef target="experts/deep-step" />
+
+# Typst equations
+
+Inline $eta in (0, 1)$.
+
+<ProofBlock id="aligned-proof" for="other-result">
+
+First proof paragraph.
+
+1. First list item.
+2. Second list item.
+
+$$
+sum_(i=1)^n x_i &= x_1 + dots + x_n \
+  &<= x_1 + x_2 + x_3 + x_4
+$$
+
+Last proof paragraph.
+
+</ProofBlock>
+
+```typst id="typst-fraction"
+$ frac(a, b) $
+```
+
+<HiddenCoinExplorer client:visible />
+
+<MWUHider client:visible />

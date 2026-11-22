@@ -10,14 +10,14 @@ interface Props {
 
 const { lecture } = Astro.props;
 const index = lectures.findIndex((item) => item.frontmatter.slug === lecture.frontmatter.slug);
-const headings = lecture.getHeadings().filter((heading) => heading.depth === 2);
+const headings = lecture.getHeadings().filter(({ depth }) => depth <= 2);
 ---
 
 <ReadingLayout
   title={lecture.frontmatter.title}
-  eyebrow={`Section ${lectureNumber(lecture)} / ${String(lectures.length).padStart(2, '0')}`}
+  eyebrow={`Section ${lectureNumber(lecture)} / ${lectureNumber(lectures[lectures.length - 1])}`}
   currentSlug={lecture.frontmatter.slug}
-  headings={headings}
+  {headings}
 >
   <slot />
   <LecturePagination

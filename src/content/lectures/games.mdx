@@ -53,7 +53,8 @@ to learn about what is possible in the situation. Two player games are one such 
 
 # MWU Model
 
-Consider an arbitrary game with two players. Alice will be the row player and Bob will be the column player.
+Consider an arbitrary finite zero-sum two player game. Finite means both players have a finite number of choices.
+Zero-sum means that both players' payoffs sum to zero. Alice will be the row player and Bob will be the column player.
 The row player has $N$ options and the column player has $K$ options.
 
 Let $M in [0, 1]^(N times K)$ represent the costs of this game. So if Alice chooses $i$ and Bob chooses $j$,
@@ -65,11 +66,11 @@ $$
 
 If the players independently sample $p in Delta_N, q in Delta_K$, the expected amount Alice pays Bob is
 $$
-  p_T M q = sum_(i = 1)^N sum_(j = 1)^K p_i q_j M_(i j)
+  p^top M q = sum_(i = 1)^N sum_(j = 1)^K p_i q_j M_(i j)
 $$
 
-If $p$ is fixed, then Bob can maximize this by choosing a single column $e_j$ with the largest value $p_T M e_j$.
-Similarly, if $q$ is fixed, then Alice can minimize this quantity by choosing a single row $e_i$ with the smallest value $e_i^T M q$.
+If $p$ is fixed, then Bob can maximize this by choosing a single column $e_j$ with the largest value $p^top M e_j$.
+Similarly, if $q$ is fixed, then Alice can minimize this quantity by choosing a single row $e_i$ with the smallest value $e_i^top M q$.
 An arbitrary strategy is a probability distribution over the rows for Alice or over the columns for Bob.
 
 We will now describe how the MWU algorithm is applied here. First, try to figure out how it might work yourself.
@@ -77,11 +78,12 @@ We will now describe how the MWU algorithm is applied here. First, try to figure
 Alice will be using MWU. She starts with all rows weighted $omega_1 (i) = 1$. The $N$ rows are her $N$ experts.
 Each round of the game is a decision. In round t:
 1. Alice chooses her row distribution $p_t$ via $p_t (i) = (omega_t (i))/Phi_t$.
-2. Bob chooses a best column $j_t$ s.t. $p_t^T M e_(j_t)$ is maximal.
+2. Bob chooses a best column $j_t$ s.t. $p_t^top M e_(j_t)$ is maximal.
 3. They both resolve their choices from their probability distributions and Alice pays Bob the resulting amount.
-4. Alice enters the loss function $ell_t = (M e_(j_t))_i$ into the MWU update algorithm, so every row weight is updated accordingly as $omega_(t + 1) (i) = omega_t (i) e^(-epsilon ell_t (i))$. 
+4. Alice enters the loss function $ell_t = M e_(j_t)$ into the MWU update algorithm, so every row weight is updated accordingly as $omega_(t + 1) (i) = omega_t (i) e^(-epsilon ell_t (i))$. 
 
 The expected round loss is $p_t dot ell_t$, and the distribution for Alice updates in response to the loss incurred by the optimal strategy for Bob.
+Recall that we treat $ell_t$ as a vector and a function so $ell_t (i) = (M e_(j_t))_i$ and $x dot ell_t = sum_(i = 1)^N x_i ell_t (i)$.
 
 Applying the bound from the previous page, we get that if $T$ rounds of the game are played, the loss is at most
 $$
@@ -92,14 +94,17 @@ Alice studied computational learning theory, so now she decides to use the multi
 
 <MWUHider client:visible />
 
-# Minimax From Regret
+# Optimal Strategy Inequality
 
-For a row distribution $p$, let $U(p) = max_(j in [K]) p^T M e_j$, which is an upper bound on Bob's payoff against Alice if Alice is using $p$.
-For a column distribution $q$, let $L(q) = min_(i in [N]) e_i^T M q$, which is a lower bound on what Alice must pay Bob if Bob is using $q$.
+For a row distribution $p$, let $U(p) = max_(j in [K]) p^top M e_j$, which is an upper bound on Bob's payoff against Alice if Alice is using $p$.
+For a column distribution $q$, let $L(q) = min_(i in [N]) e_i^top M q$, which is a lower bound on what Alice must pay Bob if Bob is using $q$.
+
+Note that every distributional strategy is a weighted average of single choice strategies with the payoffs averaged as well, 
+so we have $U(p) = max_(q in Delta_K) p^top M q$ and $L(q) = min_(p in Delta_N) p^top M q$ as well.
 
 For every $p, q$, we have
 $$
-  L(q) <= p^T M q <= U(p) \
+  L(q) <= p^top M q <= U(p) \
   ==> max_(q in Delta_K) L(q) <= min_(p in Delta_N) U(p) 
 $$
 
@@ -108,39 +113,83 @@ And if Alice can guarantee that she pays Bob at most $y$, then Bob cannot guaran
 Note that this inequality did not use multiplicative weights at all.
 
 We can use multiplicative weights to say more.
+
+# Von Neumann's Minimax Theorem
+
+<TheoremBlock id="minimax-theorem">
+
+$$
+  min_(p in Delta_N) max_(q in Delta_K) p^top M q = max_(q in Delta_K) min_(p in Delta_N) p^top M q
+$$
+
+</TheoremBlock>
+
+The inequality above already tells us the left side is greater than or equal to the right side, so it suffices to prove the other inequality.
+We will prove this by using the multiplicative weights algorithm in the same way as was described earlier.
+By showing that the average regret tends to $0$, we will establish the other inequality.
+
+Note that for $N = 1$ this theorem is immediate as Bob always chooses the largest column value and Alice cannot do anything about it.
+
+<ProofBlock id="minimax-proof" for="minimax-theorem">
+<span slot="summary">Proof</span>
+
 Consider playing $T$ rounds of the game where Alice uses MWU and Bob plays optimally as before.
 
 For any round $t$, we have
 $$
-  U(p_t) <= p_t^T M e_(j_t)
-$$
-So averaging across all rounds yields $p = 1/T sum_(t = 1)^T p_t$ with
-$$
-  U(p) <= 1/T sum_(t = 1)^T p_t^T M e_(j_t) = 1/T sum_(t = 1)^T p_t dot ell_t
+  U(p_t) = p_t^top M e_(j_t)
 $$
 
-Additionally, the regret bound says for $q = 1/T sum_(t = 1)^T q_t$,
+So averaging across all rounds yields $p = 1/T sum_(t = 1)^T p_t$.
+Then $j^*$ be the fixed column which is Bob's best response to $p$. 
+Note that against Alice's average strategy, any fixed column earns its average payout across rounds.
+So Bob's round by round best responses do at least that well.
+$$
+  U(p) &= p^top M e_(j^*) \
+  &= 1/T sum_(t = 1)^T p_t^top M e_(j^*) \
+  &<= 1/T sum_(t = 1)^T p_t^top M e_(j_t) \
+  &= 1/T sum_(t = 1)^T p_t dot ell_t
+$$
+
+Now note that against Bob's empirical distribution $q = 1/T sum_(t = 1)^T e_(j_t)$,
+each fixed row costs exactly what the row cost on average during the $T$ rounds.
+So the regret bound says
 $$
   sum_(t = 1)^T p_t dot ell_t &<= min_(i in [N]) sum_(t = 1)^T ell_t (i) + 2sqrt(T ln(N)) \
-    &= min_(i in [N]) sum_(t = 1)^T e_i (M e_(j_t)) + 2sqrt(T ln(N)) \
+    &= min_(i in [N]) sum_(t = 1)^T e_i^top (M e_(j_t)) + 2sqrt(T ln(N)) \
+    &= min_(i in [N]) T e_i^top M q + 2sqrt(T ln(N)) \
     &= T L(q) + 2sqrt(T ln(N))
 $$
 
+Both bounds use the same average argument against the other player's fixed options.
 Combining the two bounds yields
 $$
   U(p) <= 1/T sum_(t = 1)^T p_t dot ell_t <= L(q) + 2sqrt(ln(N)/T)
 $$
-So for $epsilon > 0$, we can make $T$ large enough that our values of $p, q$ yield $U(p) - L(q) <= 2sqrt(ln(N)/T) < epsilon$.
+So for $delta > 0$, choose $T = ceil((4ln(N))/delta^2)$ and set the learning parameter $epsilon = sqrt(ln(N)/T)$ so that
+our values of $p, q$ yield $U(p) - L(q) <= 2sqrt(ln(N)/T) <= delta$.
 
-This proves that for those values of $p, q$ we have $U(p) <= L(q)$, which we combine with $L(q) <= U(p)$ to get $U(p) = L(q)$.
-
-# Von Neumann's Minimax Theorem
-
-Theorem:
+Let $V_("min") = min_(p in Delta_N) U(p), V_("max") = max_(q in Delta_K) L(q)$. We showed earlier that $V_"max" <= V_"min"$.
+Now we take
 $$
-  min_(p in Delta_N) max_(q in Delta_K) p^T M q = max_(p in Delta_K) min_(p in Delta_N) p^T M q
+  0 &<= V_"min" - V_"max" \
+    &<= U(p) - L(q) \
+    &<= 2sqrt(ln(N)/T)
+$$
+Taking the limit of $T -> infinity$, we get $V_"min" = V_"max"$.
+$$
+  min_(p in Delta_N) max_(q in Delta_K) p^top M q &= min_(p in Delta_N) U(p) \
+    &= V_"min" \
+    &= V_"max" \
+    &= max_(q in Delta_K) L(q) \
+    &= max_(q in Delta_K) min_(p in Delta_N) p^top M q
 $$
 
-This number that both sides are equal to is referred to as the value of the game, where an optimal strategy for either player ensures the player performs
-better than this number even if the strategy is announced to the other player and they react optimally.
+</ProofBlock>
+
+This number that both sides are equal to is referred to as the value of the game, where an optimal strategy for Alice ensures she pays at most
+the value of the game, and an optimal strategy for Bob ensures he gets paid at least the value of the game.
+
+This theorem also tells us that assuming that both players play optimally, 
+it does not matter who announces their strategy first, the other person can always respond to ensure the same payout.
 

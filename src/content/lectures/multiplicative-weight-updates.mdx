@@ -131,7 +131,7 @@ $$
 
 So we can choose the learning rate to ensure that the total regret increases by a square root factor of $T$.
 First fixing $N$, this tells us that for example if we multiply the number of decisions by $100$, we only expect $10$ times more regret.
-But what this means is that on average per decision, our regret is $1/10$th of what it was before. 
+But what this means is that on average per decision, the bound on our regret is $1/10$th of what it was before. 
 In general, the average regret per decision is bounded by $2sqrt(T ln(N))/T = 2sqrt(ln(N)/T)$, which shrinks as $T$ increases.
 
 Furthermore, if we fix $T$, this regret increases by a square root of log factor of $N$, so even with many more experts
@@ -147,17 +147,19 @@ a choice of loss functions for which the algorithm cannot do asymptotically bett
 <ExpertGame preset="coin-flip-experts" collapsible client:visible />
 
 <TheoremBlock id="general-lower-bound">
-For any online decision making algorithm given $N >= 2$ decisions and $T$ steps,
-there exists a sequence $ell_1, dots, ell_T in [0, 1]^N$ of loss functions such that
-$min_(i in [N]) sum_(t = 1)^N ell_t (i) = Omega(T)$ and if the algorithm chooses decision distributions
-$p_1, dots, p_T$, then
+There exists a universal constant $c > 0$ such that for any online decision making algorithm $A$ given $N >= 2$ decisions and $R >= 2$ rounds,
+there exists a sequence $ell_1, dots, ell_R in [0, 1]^N$ of loss functions such that
+$min_(i in [N]) sum_(t = 1)^R ell_t (i) >= R/2$ and if the algorithm chooses decision distributions
+$p_1, dots, p_R$
 $$
-  sum_(t = 1)^T p_t dot ell_t - min_(i in [N]) sum_(t = 1)^T ell_t (i) >= Omega(sqrt(T ln(N)))
+  E[sum_(t = 1)^R p_t dot ell_t] - min_(i in [N]) sum_(t = 1)^R ell_t (i) >= c min{R, sqrt(R ln(N))}
 $$
+The expected value is over the algorithm's internal randomness.
 </TheoremBlock>
 
 The approach to prove this will be to construct a scenario where no algorithm can do better than coin flips,
-and then upper bound the minimum regret using the [probabilistic method](https://math.bme.hu/~gabor/oktatas/SztoM/AlonSpencer.ProbMethod3ed.pdf).
+and then lower bound the worst-case expected regret using the [probabilistic method](https://math.bme.hu/~gabor/oktatas/SztoM/AlonSpencer.ProbMethod3ed.pdf).
+We will show that the luckiest of $N$ experts will do well enough on average to give us the existence of a large expected regret.
 
 Some tools from probability are used in this proof, all of which will certainly be discussed in an introductory probability course such as 
 [this one](https://www.math.cmu.edu/~gautam/c/2026-425/notes/index.html) with the exception of the following lemma, which we will state without proof
@@ -171,37 +173,74 @@ $$
 <ProofBlock id="lb-proof" for="general-lower-bound">
 <span slot="summary">Proof</span>
 
-Given $R$ decisions total, let $T = max{1, floor(R/2)}$ be the first half of the decisions and $N >= 2$ experts.
+Let $T = floor(R/2)$ be the first half of the decisions and $N >= 2$ experts.
 We will first work with just the first $T$ decisions. We set the loss of expert $1$ to be $1/2$ for every decisions.
 For $i > 1$, for each decision $t$, its loss is determined by a fair coin flip $0$ for tails, $1$ for heads (If you know probability this is a Bernoulli($1/2$) random variable).
-So the expected loss for any decision is $1/2$.
+So the expected loss for any decision is $1/2$. The coin flips are independent across experts and rounds, and are independent of the algorithm's randomness.
+As a result, any online algorithm incurs expected loss $1/2$ in each of the first $T$ rounds.
 
 Taking the expected value of the entire process, 
 $$
-  E (sum_(t = 1)^T p_t dot ell_t) &= sum_(t = 1)^T E (p_t dot ell_t) && "By linearity of expectation" \
-    &= sum_(t = 1)^T p_t dot E (ell_t) && "Since $p_t$ is constant"\
-    &= sum_(t = 1)^T p_t dot 1/2 \
-    &= T/2 && "By $p_t dot 1/2 = 1/2$ since $p_t$ is a probability distribution"
+  E[sum_(t = 1)^T p_t dot ell_t] &= sum_(t = 1)^T E[p_t dot ell_t] && ("By linearity of expectation") \
+    &= sum_(t = 1)^T E[p_t] dot (1/2) && ("By independence, note" (1/2) "is the vector where every coordinate is" 1/2) \
+    &= T/2 && ("By" E[p_t] dot (1/2) = 1/2 "since" E[p_t] "is a probability distribution")
 $$
+We used the fact that $ell_t$ is independent of $p_t$ as fresh randomness is used in determining the loss, and $ell_t$ is observed after $p_t$ is chosen.
 For every $i$, let $X_i = sum_(t = 1)^T ell_t (i)$, note that $X_1 = T/2$ and for $i > 1$, $X_i ~ "Binom"(T, 1/2)$.
 
-The concentration inequality with $a = min{T/8, 1/4 sqrt(T ln N)}$ yields 
+We have $N - 1$ independent chances for an expert to get lucky and finish with loss at most $T/2 - a$.
+A probabiliy on order of $1/N$ is enough to give us a constant chance that at least one succeeds.
+The concentration lemma guarantees this probability whenever $a <= T/8$ and $16a^2/T <= ln(N)$.
+So we tale $a = min{T/8, 1/4 sqrt(T ln N)}$ to yield 
 $$
-  P[x_i > T/2 - t] &<= 1 - 1/15 e^(-16 a^2/T) \
-    &<= 1 - 1/15 e^(-16/T (1/4 sqrt(T ln(N))^2)) \
+  P[X_i > T/2 - a] &<= 1 - 1/15 e^(-16 a^2/T) \
+    &<= 1 - 1/15 e^(-16/T (1/16 sqrt(T ln(N))^2)) \
     &= 1 - 1/15 e^(-ln(N)) \
     &= 1 - 1/(15N) 
 $$
+
+
 Now we can take the minimum
 $$
-  P[min_(i in [N]) X_i > T/2 - t] &= product_(i = 2)^N P[X_i > T/2 - t] && "By independence and $X_1 = T/2$" \
+  P[min_(i in [N]) X_i > T/2 - a] &= product_(i = 2)^N P[X_i > T/2 - a] && "By independence and $X_1 = T/2$" \
   &<= (1 - 1/(15N))^(N - 1) \
   &<= e^(-(N - 1)/(15N)) \
   &<= e^(-1/30)
 $$
 
+Let $M = min_(i in [N]) X_i$ be the best expert's loss over the first $T$ rounds. Since $X_1 = T/2$, we know $X_1 - M >= 0$ for every outcome.
+$$
+  E[T/2 - M] >= a P[T/2 - M >= a] = a P[M <= T/2 - a] >= a(1 - e^(-1/30))
+$$
 
 For the remaining decisions after $T$, we set the loss of every expert to be $1$.
+So the best expert's loss is $M + (R - T) >= R/2 = Omega(R)$ as desired.
+
+The algorithm's total loss is $sum_(t = 1)^T p_t dot ell_t + (R - T)$, so the expected regret is
+$$
+  E[(sum_(t = 1)^T p_t dot ell_t + (R - T)) - (M + (R - T))] &= E[sum_(t = 1)^T p_t dot ell_t] - E[M] \
+  &= T/2 - E[M] && ("Expected value of algorithm") \
+  &>= a(1 - e^(-1/30)) && ("Expected value bound") \
+  &= min{T/8, 1/4 sqrt(T ln(N))} (1 - e^(-1/30)) && ("Substituting") \
+  &>= 1/24 min{R, sqrt(R ln(N))} (1 - e^(-1/30)) && (T >= R/3)
+$$
+Our constant is $c = 1/24 (1 - e^(-1/30))$
+
+Averaged over the random losses and algorithm's randomness, the expected value of the regret
+is lower bounded by $c (min{R, sqrt(R ln(N))})$. So there must exist some fixed
+sequence of loss functions which produce expected regret that is at least $c (min{R, sqrt(R ln(N))})$ over the algorithm's internal randomness.
+Every sequence of loss functions in our construction guarantees the best expert loss is at least $R/2$, so we have found
+a sequence of loss functions satisfying the theorem.
+
+This is the probabilistic method in action, as we have used expectation to show that such a sequence of loss functions must exist.
 </ProofBlock>
 
+# Loss Extension
+
+It turns out that for any bounded losses $[a, b]$ where $a, b in RR, a < b$, this algorithm still works and the regret bound is simply scaled by $b - a$.
+To prove this we can retrace the steps of the proof and make all of the necessary modifications, or we can notice that we can transform the losses
+with an affine function. Let $f_t$ be the loss functions $f : [N] -> [a, b]$.
+
+Then we let $ell_t (i) = (f_t (i) - a)/(b - a), ell_t : [N] -> [0, 1]$ and notice that this affine transformation does not change what strategies are optimal.
+The regret is then bounded by $(b - a)(T epsilon + ln(N)/epsilon)$. Try to prove this.
 

@@ -1,0 +1,41 @@
+---
+import type { StatementKind } from '../../lib/notes/types';
+import { blockMetadata } from './metadata';
+import type { BlockIdentity } from './metadata';
+import Permalink from './Permalink.astro';
+
+/** The default slot is owner-authored; this component supplies structure only. */
+interface Props extends BlockIdentity {
+  kind?: StatementKind;
+  title?: string;
+  /** Preserves the original TheoremBlock display contract. Prefer generated numbers. */
+  number?: number;
+}
+const { id, kind = 'theorem', title, number } = Astro.props;
+const block = blockMetadata(Astro.props);
+const fallbackLabel = `${kind[0].toUpperCase() + kind.slice(1)}${number === undefined ? '' : ` ${String(number).padStart(2, '0')}`}`;
+const label = block?.label ?? fallbackLabel;
+---
+
+<section id={id} class="statement-block note-target" data-note-block={block?.key} tabindex="-1" aria-label={title ? `${label}: ${title}` : label}>
+  <header class="block-header">
+    <p class="block-label"><Permalink block={block}>{label}{title && <span class="block-title"> — {title}</span>}</Permalink></p>
+  </header>
+  <div class="statement"><slot /></div>
+</section>
+
+<style>
+  .statement-block {
+    margin-block: var(--space-6);
+    border: 1px solid var(--color-rule);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-panel);
+    padding: var(--space-6);
+    background: var(--color-accent-soft);
+  }
+  .block-header { margin-bottom: var(--space-5); }
+  .block-label { color: var(--color-accent); font-family: var(--font-interface); font-size: var(--text-ui); font-weight: 600; }
+  .block-title { color: var(--color-ink); font-weight: 400; }
+  .statement { --slot-height: var(--slot-height-statement); }
+  @media (max-width: 40rem) { .statement-block { padding: var(--space-4); } }
+</style>

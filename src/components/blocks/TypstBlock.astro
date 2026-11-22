@@ -1,0 +1,92 @@
+---
+import katex from 'katex';
+import { blockMetadata } from './metadata';
+import type { BlockIdentity } from './metadata';
+import { sitePath } from '../../lib/paths';
+import Permalink from './Permalink.astro';
+import { typstPixelsPerEm } from '../../lib/notes/types';
+import { hasAccessibleContent } from '../../lib/notes/accessible-html';
+
+/** Build-only compiled image with an accessible alternative. */
+interface Props extends BlockIdentity {
+  code: string;
+  alt?: string;
+  tex?: string;
+  __asset?: string;
+  __width?: string;
+  __height?: string;
+  __mathml?: string;
+}
+const { id, alt, tex, __asset, __width, __height, __mathml } = Astro.props;
+if (!__asset || !__width || !__height) throw new Error('TypstBlock must be compiled in a lecture MDX file.');
+const block = blockMetadata(Astro.props);
+const width = Number(__width);
+const height = Number(__height);
+const hasAlternative = Astro.slots.has('alternative');
+const alternative = hasAlternative ? await Astro.slots.render('alternative') : undefined;
+if (hasAlternative && !hasAccessibleContent(alternative ?? '')) throw new Error(`Typst alternative for ${id ?? 'unnumbered block'} must not be empty or hidden.`);
+const semantic = !hasAlternative && tex?.trim()
+  ? katex.renderToString(tex, { displayMode: true, output: 'htmlAndMathml', throwOnError: true })
+  : __mathml;
+if (!hasAlternative && !semantic && !alt?.trim()) throw new Error('TypstBlock requires an accessible alternative.');
+const number = block && `(${block.number})`;
+---
+
+<div id={id} class="typst-block note-target" data-note-block={block?.key} tabindex="-1">
+  <div class="equation-row" data-equation-number={number}>
+    <div class="math-scroll" role="region" aria-label={block?.label ?? 'Mathematical expression'} tabindex="0">
+      <img
+        src={sitePath(__asset)} width={width} height={height}
+        style={`width: ${width / typstPixelsPerEm}em; height: auto;`}
+        alt={hasAlternative || semantic ? '' : alt}
+        aria-hidden={hasAlternative || !!semantic ? 'true' : undefined}
+      />
+    </div>
+    {block && <span class="equation-label"><Permalink block={block}>{number}</Permalink></span>}
+  </div>
+  {(hasAlternative || semantic) && <div class="visually-hidden">
+    <Fragment set:html={hasAlternative ? alternative : semantic} />
+  </div>}
+</div>
+
+<style>
+  .typst-block {
+    container-type: inline-size;
+    margin-block: var(--space-6);
+  }
+  .equation-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+  }
+  .math-scroll {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    padding-block: var(--space-3);
+    font-size: var(--text-body);
+  }
+  img {
+    flex: none;
+    max-inline-size: none;
+    margin-inline: auto;
+  }
+  .equation-label {
+    justify-self: end;
+    font-size: var(--text-sm);
+    white-space: nowrap;
+  }
+  @container (min-width: 30rem) {
+    .equation-row[data-equation-number] {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      column-gap: var(--space-4);
+    }
+    /* Balance the number's width on the left so the formula stays centered. */
+    .equation-row[data-equation-number]::before {
+      content: attr(data-equation-number);
+      visibility: hidden;
+      font-size: var(--text-sm);
+      white-space: nowrap;
+    }
+  }
+</style>

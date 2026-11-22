@@ -7,14 +7,17 @@ import mdx from '@astrojs/mdx';
 import { unified } from '@astrojs/markdown-remark';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import notesSystem from './src/integrations/notes/index.ts';
+
+const notes = notesSystem();
 
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
-  integrations: [svelte(), mdx()],
+  integrations: [notes.integration, svelte(), mdx()],
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkMath],
+      remarkPlugins: [remarkMath, notes.remarkPlugin],
       rehypePlugins: [rehypeKatex],
     }),
   },

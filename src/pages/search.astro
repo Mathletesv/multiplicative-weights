@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { sitePath } from '../lib/paths';
+---
+
+<BaseLayout title="Search · Multiplicative weights">
+  <section class="search-page" data-note-search={sitePath('search-index.json')} aria-labelledby="search-title">
+    <h1 id="search-title">Search the notes</h1>
+    <form role="search" action={sitePath('search/')} method="get">
+      <label for="search-query" class="visually-hidden">Search the notes</label>
+      <input id="search-query" type="search" name="q" placeholder="Search lectures, theorems, or equations" maxlength="120" />
+      <button type="submit">Search</button>
+    </form>
+    <p class="search-status" role="status" data-search-status></p>
+    <ol class="results" role="list" data-search-results aria-label="Search results"></ol>
+    <template data-search-result>
+      <li>
+        <span class="lecture" data-result-lecture></span>
+        <h2><a data-result-link></a></h2>
+        <p class="excerpt" data-result-excerpt></p>
+      </li>
+    </template>
+    <noscript><p>Search requires JavaScript. <a href={sitePath('#sections')}>Browse the sections</a>.</p></noscript>
+  </section>
+</BaseLayout>
+
+<script>
+  import { installNoteSearch } from '../scripts/note-search';
+
+  const search = document.querySelector<HTMLElement>('[data-note-search]');
+  if (search) installNoteSearch(search);
+</script>
+
+<style>
+  .search-page {
+    margin-block: var(--space-12) var(--space-24);
+  }
+
+  h1 {
+    margin-bottom: var(--space-8);
+    font-size: var(--text-title);
+    line-height: var(--leading-heading);
+    letter-spacing: -0.035em;
+  }
+
+  form {
+    display: flex;
+    gap: var(--space-3);
+    max-inline-size: 48rem;
+  }
+
+  input, button {
+    min-height: var(--space-12);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-panel);
+  }
+
+  input {
+    flex: 1;
+    min-inline-size: 0;
+    padding-inline: var(--space-3);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: 1rem;
+  }
+
+  input::placeholder {
+    color: var(--color-muted);
+  }
+
+  button {
+    padding-inline: var(--space-4);
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-surface);
+    cursor: pointer;
+  }
+
+  button:hover { background: var(--color-accent-hover); }
+
+  .search-status, noscript p {
+    margin-top: var(--space-6);
+    color: var(--color-muted);
+  }
+
+  .search-status:empty { margin: 0; }
+
+  .results {
+    list-style: none;
+    margin: var(--space-4) 0 0;
+    padding: 0;
+  }
+
+  li {
+    display: grid;
+    gap: var(--space-2);
+    padding-block: var(--space-4);
+    border-block-start: 1px solid var(--color-rule);
+  }
+
+  .lecture {
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+
+  h2 {
+    font-size: var(--text-body);
+    overflow-wrap: anywhere;
+  }
+
+  .excerpt {
+    max-inline-size: 72ch;
+    color: var(--color-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .lecture:empty, .excerpt:empty { display: none; }
+</style>

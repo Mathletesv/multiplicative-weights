@@ -21,12 +21,22 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v7
 
+      - name: Install pinned Typst compiler
+        env:
+          TYPST_VERSION: 0.15.1
+          TYPST_SHA256: a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/typst.tar.xz" "https://github.com/typst/typst/releases/download/v${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz"
+          echo "$TYPST_SHA256  $RUNNER_TEMP/typst.tar.xz" | sha256sum --check
+          tar -xJf "$RUNNER_TEMP/typst.tar.xz" --directory "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/typst-x86_64-unknown-linux-musl" >> "$GITHUB_PATH"
+
       - name: Install, check, build, and upload
         uses: withastro/action@v6
         with:
           path: .
           node-version: 24
-          build-cmd: npm run build
+          build-cmd: npm test && npx playwright install --with-deps chromium && npm run test:browser && npm run build
 
   deploy:
     needs: build
