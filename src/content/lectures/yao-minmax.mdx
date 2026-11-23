@@ -1,0 +1,63 @@
+---
+order: 4
+slug: yao
+title: Communication Complexity
+math: typst
+---
+
+# Definitions
+
+If you remember communication complexity, you may skip this section.
+
+$D_mu^epsilon (F)$ is the lowest cost of a deterministic protocol $P$ such that $Pr[P(x, y) != F(x, y)] <= epsilon$,
+where $x, y$ are selected using distribution $mu$.
+
+$R_"pub"^epsilon (F)$ is the lowest cost of a randomized protocol $P$ such that for all $x, y$, $Pr[P(x, y) != F(x, y)] <= epsilon$.
+
+# Yao's Minimax Principle
+
+<TheoremBlock id="yao-minimax-theorem">
+
+For any function $F : X times Y -> Z$, $R_"pub"^epsilon (F) = max_(mu "any dist") D_mu^epsilon (F)$
+
+</TheoremBlock>
+
+Before going forward, try to see if you can prove the theorem now.
+
+<HintBlock id="yao-minimax-hint">
+  <span slot="summary">Hint</span>
+
+Formalize it with multiplicative weights similarly to two-player games.
+There is also a way to formalize Yao's Minimax Principle as a 2-player game and immediately solve it with Von Neumann's Minimax Theorem, 
+but try to do it directly using multiplicative weights.
+
+</HintBlock>
+
+# Multiplicative Weights Model
+
+Fix the cost bound $c = max_(mu "any dist") D_mu^epsilon (F)$. Fix $N$ such that the inputs have length $|x| = |y| = N$.
+By our choice of $c$, for every input distribution $mu$, there is a deterministic protocol of cost at most $c$ with error at most $epsilon$ under $mu$.
+
+We run MWU with each input pair corresponding to an expert. There are a finite number of input pairs.
+We set the initial weights of all experts to $1$.
+For each round $t$:
+1. Normalize the weights to get a distribution $mu_t$ over input pairs.
+2. Choose a deterministic protocol $P_t$ of cost at most $c$ and error at most $epsilon$ under $mu_t$. This exists by assumption.
+3. Set the MWU loss of $(x, y)$, $ell_t (x, y)$ to $1$ if $P_t (x, y) = f(x, y)$ and $0$ otherwise and update the weights accordingly.
+
+It is reasonable to expect this communication similarity to be quite different from finite zero-sum 2-player games,
+but in fact from here the proof is the same as the one described at the end of the previous section.
+Our final randomized protocol will simply be uniformly randomly choosing a round $t in [T]$ and then running $P_t$.
+
+Notice that we are assigning high loss to successful input pairs. This causes incorrect input pairs to be weighted higher in the distribution,
+ which means we will be more likely to select a protocol which gets them right as well.
+
+The beauty of the multiplicative weights algorithm lies in its immediate applicability once a problem can be modeled as an instance of applying the algorithm.
+
+{/* # Proof
+
+We will now prove Yao's Minimax Principle.
+
+<ProofBlock id="yao-minimax-proof" for="yao-minimax-theorem">
+  <span slot="summary">Proof</span>
+</ProofBlock> */}

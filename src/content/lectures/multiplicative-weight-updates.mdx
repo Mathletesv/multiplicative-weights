@@ -130,7 +130,7 @@ $$
 </ProofBlock>
 
 So we can choose the learning rate to ensure that the total regret increases by a square root factor of $T$.
-First fixing $N$, this tells us that for example if we multiply the number of decisions by $100$, we only expect $10$ times more regret.
+First fixing $N$, this tells us that for example if we multiply the number of decisions by $100$, the regret bound only grows by a factor of $10$.
 But what this means is that on average per decision, the bound on our regret is $1/10$th of what it was before. 
 In general, the average regret per decision is bounded by $2sqrt(T ln(N))/T = 2sqrt(ln(N)/T)$, which shrinks as $T$ increases.
 
@@ -162,12 +162,21 @@ and then lower bound the worst-case expected regret using the [probabilistic met
 We will show that the luckiest of $N$ experts will do well enough on average to give us the existence of a large expected regret.
 
 Some tools from probability are used in this proof, all of which will certainly be discussed in an introductory probability course such as 
-[this one](https://www.math.cmu.edu/~gautam/c/2026-425/notes/index.html) with the exception of the following lemma, which we will state without proof
+[this one](https://www.math.cmu.edu/~gautam/c/2026-425/notes/index.html) with the exception of the following lemma.
 
 Concentration Lemma: Let $X ~ "Binom(T, 1/2)"$ and $a in [0, T/8]$. Then
 $$
   P[X <= T/2 - a] >= 1/15 e^(-16 a^2/T)
 $$
+
+Knowing the details of this proof is not necessary but it is here if you desire to see it.
+
+<ProofBlock id="concentration-lemma-proof">
+  <span slot="summary">Proof of the concentration lemma</span>
+
+**TODO**
+
+</ProofBlock>
 
 
 <ProofBlock id="lb-proof" for="general-lower-bound">
