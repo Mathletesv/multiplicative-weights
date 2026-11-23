@@ -20,18 +20,24 @@ One example is to find approximately optimal strategies in zero-sum games.
 The primary question here is "What can you guarantee even when your opponent knows your strategy?"
 
 We will conclude by showing how randomized lower bounds can be proved in communication complexity using multiplicative weight updates.
-Here the question of interest is the relation between randomized public coin complexity and distributional complexity.
+Here the question of interest is the relation between public-coin randomized communication complexity and distributional communication complexity.
 
 # Prerequisites
 
 Learning the multiplicative weights algorithm requires primarily a willingness to deal precisely with algebra, logic, and basic probability.
 A background in algorithms and online algorithms in particular may help provide intuition and make the content easier to understand. 
-One theorem deals more heavily with probability, but probability is not essential to understand the intuition behind it.
-Prior experience with 2 player games is not necessary to understand the ways in which this algorithm applies. Some linear algebra is used for 2 player games.
+
+The regret lower bound deals more heavily with probability, but probability is not essential to understand the intuition behind it.
+
+Prior experience with 2 player games is not necessary to understand the ways in which this algorithm applies. 
+Matrix-vector multiplication and transposes are used for 2 player games.
+
 For the application in communication complexity, prior knowledge of protocols, distributional communication, and randomized communication is necessary.
-A reference can be found [here](https://www.cs.toronto.edu/~toni/Courses/CommComplexity2022/Lectures/randomized-cc.pdf). This reference covers the theorem we prove,
-but we will suggest a different proof.
+A brief reference can be found at [Communication Complexity and Applications](https://www.cs.toronto.edu/~toni/Courses/CommComplexity2022/Lectures/randomized-cc.pdf). 
+This reference covers the theorem we prove, but we will suggest a different proof.
 
 # Notation
 
 We use $[N] = {1, dots, N}$.
+
+For two functions $f : [N] -> RR, g : [N] -> RR$, we use $f dot g = sum_(i = 1)^N f(i) g(i)$.

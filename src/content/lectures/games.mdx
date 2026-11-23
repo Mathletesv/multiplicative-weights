@@ -13,17 +13,17 @@ import MWUHider from '../../components/games/MWUHider.svelte';
 Consider the following game played between Alice and Bob.
 Alice has a coin that she hides in either a red or a blue box.
 Bob picks a box. If Bob does not find the coin, he gets \$0.
-If Bob finds the coin in the red box, he gets \$2.
-But if Bob finds the coin in the blue box, he gets \$1.
+If Bob finds the coin in the red box, he gets \$1.
+But if Bob finds the coin in the blue box, he gets \$0.50.
 
 Also, after a player plays, they tell the other player what strategy they used.
-So if Alice starts with the strategy of always picking the blue box, Bob knows to just pick the blux box and get \$1.
+So if Alice starts with the strategy of always picking the blue box, Bob knows to just pick the blue box and get \$0.50.
 
 This is interesting with randomized strategies, where if Alice tells Bob she will pick either box with probability $1/2$,
-then Bob now picks the red box and wins \$1 on average.
+then Bob now picks the red box and wins \$0.50 on average.
 
 If Bob tells Alice that he will pick a box randomly with probability $1/2$ for each box, then Alice will always pick the
-blue box and Bob will get \$0.50 on average.
+blue box and Bob will get \$0.25 on average.
 
 Try experimenting with other probabilities in the widget, and try to find the optimal strategy for Alice.
 
@@ -33,10 +33,10 @@ The optimal strategy for Alice is to pick the red box with probability $1/3$ and
 In this case let $0 <= p <= 1$ be the probability Bob picks the red box. Bob wins
 
 $$
-2 dot P["Alice picks red"] dot p + 1 dot P["Alice picks blue"] dot (1 - p)
-  &= 2 dot 1/3 dot p + 1 dot 2/3 dot (1 - p) \
-  &= 2/3 p + 2/3 - 2/3 p \
-  &= 2/3 approx \$0.67
+1 dot P["Alice picks red"] dot p + 0.5 dot P["Alice picks blue"] dot (1 - p)
+  &= 1 dot 1/3 dot p + 0.5 dot 2/3 dot (1 - p) \
+  &= 1/3 p + 1/3 - 1/3 p \
+  &= 1/3 approx \$0.33
 $$
 
 on average.
@@ -44,16 +44,16 @@ Note that this is independent of $p$!
 
 Now notice that if Bob decides to always pick the red box with probability $1/3$ and the blue box with probability $2/3$,
 and instead Alice picks the red box with probability $0 <= p <= 1$, then Bob wins
-$2 dot 1/3 dot p + 1 dot 2/3 dot (1 - p) approx dollar 0.67$ on average independently of $p$ as well!
+$1 dot 1/3 dot p + 0.5 dot 2/3 dot (1 - p) approx dollar 0.33$ on average independently of $p$ as well!
 
 This is the [minimax](https://cs.stanford.edu/people/eroberts/courses/soco/projects/1998-99/game-theory/Minimax.html) theorem,
 which we will prove using multiplicative weights. The beauty of this algorithm lies in reducing a variety of
 situations to the model of choosing between experts for a sequence of decisions and then using the guarantees of the algorithm
-to learn about what is possible in the situation. Two player games are one such situation.
+to learn about what is possible in the situation. Two-player games are one such situation.
 
 # MWU Model
 
-Consider an arbitrary finite zero-sum two player game. Finite means both players have a finite number of choices.
+Consider an arbitrary finite zero-sum two-player game. Finite means both players have a finite number of choices.
 Zero-sum means that both players' payoffs sum to zero. Alice will be the row player and Bob will be the column player.
 The row player has $N$ options and the column player has $K$ options.
 
@@ -64,7 +64,11 @@ $$
 Delta_d = {v in RR^d : v_i >= 0, sum_(i = 1)^d v_i = 1}
 $$
 
-If the players independently sample $p in Delta_N, q in Delta_K$, the expected amount Alice pays Bob is
+We let $e_i in Delta_N$ be Alice's distribution which chooses row $i$ with probability $1$.
+Similarly, $e_j in Delta_K$ is Bob's distribution which chooses column $j$ with probability $1$.
+Note if they play $e_i, e_j$, Alice pays Bob $e_i^top M e_j = M_(i j)$.
+
+If the players independently sample from $p in Delta_N, q in Delta_K$, the expected amount Alice pays Bob is
 $$
   p^top M q = sum_(i = 1)^N sum_(j = 1)^K p_i q_j M_(i j)
 $$
@@ -141,7 +145,7 @@ $$
 $$
 
 So averaging across all rounds yields $p = 1/T sum_(t = 1)^T p_t$.
-Then $j^*$ be the fixed column which is Bob's best response to $p$. 
+Then let $j^*$ be the fixed column which is Bob's best response to $p$. 
 Note that against Alice's average strategy, any fixed column earns its average payout across rounds.
 So Bob's round by round best responses do at least that well.
 $$
@@ -187,9 +191,10 @@ $$
 
 </ProofBlock>
 
-This number that both sides are equal to is referred to as the value of the game, where an optimal strategy for Alice ensures she pays at most
-the value of the game, and an optimal strategy for Bob ensures he gets paid at least the value of the game.
+This number that both sides are equal to is referred to as the value of the game, where an optimal strategy for Alice ensures she is expected to pay at most
+the value of the game, and an optimal strategy for Bob ensures he is expected to get paid at least the value of the game.
+These guarantees hold regardless of the opposing strategy, and the expectation is over the randomness of the strategies themselves.
 
 This theorem also tells us that assuming that both players play optimally, 
-it does not matter who announces their strategy first, the other person can always respond to ensure the same payout.
+it does not matter who announces their strategy first, the other person can always respond to ensure the same expected payout.
 

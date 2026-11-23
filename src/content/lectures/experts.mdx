@@ -23,19 +23,19 @@ In the following game, 2 of the experts are always correct, the other 8 are comp
 
 <ExpertGame preset="reliable-experts" collapsible client:visible />
 
-In the next game, each expert has an accuracy drawn from the normal distribution.
+In the next game, each expert has an accuracy drawn from the normal distribution with mean $.5$, standard deviation $.25$, truncated to $[0, 1]$.
 
 <ExpertGame preset="mixed-accuracy" recordForReplay collapsible client:visible />
 
 In the first setting, it is clear that a reasonable strategy is to go with the majority of currently flawless experts.
 Every time the majority of flawless experts is wrong, at most half of the previously flawless experts were correct, which means the set of flawless experts shrinks exponentially
-with the number of mistakes the algorithm makes. So as long as there is one flawless expert, the number of mistakes is logarithmic in $N$.
-But it is very rare that there are perfect experts, and if all experts are flawed then this algorithm will eventually be left with no flawless expert to follow.
+with the number of mistakes the algorithm makes. So as long as there is one flawless expert, the number of mistakes is at most $floor(log_2 N)$.
+But it is very rare that there are perfect experts, and if all experts make a mistake then this algorithm will be left with no flawless expert to follow.
 
 It is much less clear what the right approach to the second game is.
 First, we must precisely determine what our goal should be.
 If all of the experts are random coin flips, we should not expect our algorithm to do better than a coin flip either.
-But if all of the experts are mosly correct, then we want our algorithm to also be mostly correct.
+But if all of the experts are mostly correct, then we want our algorithm to also be mostly correct.
 We will capture this with the goal of minimizing regret.
 We will also generalize the situation to involve arbitrary decisions instead of boolean ones, 
 so the error of a decision will be captured by a loss function that takes values in $[0, 1]$.
@@ -50,7 +50,7 @@ On decision $t$, we may use any of the loss functions $ell_r$ for $r < t$ to det
 In some cases we may want to use randomness, such as for the first decision if all of the experts are split evenly.
 
 Let $p_t : [N] -> [0, 1], sum_(i = 1)^N p_t (i) = 1$ be the probability distribution our strategy chooses to determine which expert we follow for decision $t$.
-Then the loss of our strategy on decision $t$ is $p_t dot ell_t$, which is the expected value of our loss if we choose an expert by our probability distribution.
+Then the loss of our strategy on decision $t$ is $p_t dot ell_t = sum_(i = 1)^N p_t (i) ell_t (i)$, which is the expected value of our loss if we choose an expert by our probability distribution.
 
 Formally, we seek to design an algorithm to minimize the following, which we refer to as the regret of our algorithm.
 ```typst
@@ -65,7 +65,8 @@ The following widget allows you to replay the second widget from earlier, this t
 <RegretReplay client:visible />
 
 Here are a few more examples of situations which we hope to design an algorithm for.
-The first is detailed formally and the other two will be detailed in later pages.
+The first is detailed formally, the second can be attempted after reading the two-player games section,
+and the third involves a very common situation where multiplicative weights applies, but we will not discuss this application.
 
 <DisclosureBlock id="weather-forecasting">
   <span slot="summary">Weather Forecasting</span>

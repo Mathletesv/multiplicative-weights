@@ -91,9 +91,26 @@ test('the weight simulation steps, pauses, and stops after the configured number
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test('the weight simulation displays tiny positive weights as <0.001', async ({ page }) => {
+  await page.addInitScript(() => { Math.random = () => 1 / 0x100000000; });
+  await page.goto('learn/multiplicative-weight-updates/');
+  const widget = page.getByRole('region', { name: 'Weight simulation' });
+  await widget.locator('summary').press('Enter');
+  const autoplay = widget.getByRole('button', { name: 'Autoplay' });
+  await expect(autoplay).toBeEnabled();
+  await widget.getByRole('slider', { name: 'Decisions' }).fill('50');
+  await widget.getByRole('slider', { name: 'Epsilon' }).fill('1');
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-01-01T00:01:00Z'));
+  await autoplay.press('Enter');
+  await page.clock.runFor(100_000);
+  await expect(widget.getByRole('status')).toHaveText('Decision 50 of 50');
+  await expect(widget.getByText('<0.001', { exact: true })).toHaveCount(10);
+});
+
 test('the fair-coin game plays all ten rounds and reports scores for ten coin-flip experts', async ({ page }) => {
   await page.goto('learn/multiplicative-weight-updates/');
-  const game = page.getByRole('region', { name: 'Coin-Flip Experts' });
+  const game = page.getByRole('region', { name: 'Secret Bad Loss' });
   const summary = game.locator('summary');
   const cards = game.getByRole('list', { name: 'Expert votes and records' });
   const guess = game.getByRole('button', { name: 'True', exact: true });

@@ -33,7 +33,7 @@
   const titles: Record<GamePreset, string> = {
     'reliable-experts': 'Find the Reliable Experts',
     'mixed-accuracy': 'Trust the Streak?',
-    'coin-flip-experts': 'Coin-Flip Experts',
+    'coin-flip-experts': 'Secret Bad Loss',
   };
 
   let gameTitle = $derived(title ?? (showRegret ? 'Play with realized regret' : titles[preset]));

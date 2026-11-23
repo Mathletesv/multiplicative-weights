@@ -87,7 +87,7 @@ With focus inside an open expert game, press **T** or **F** to submit a predicti
 
 `src/components/SvgDiagram.svelte` provides a responsive SVG shell with a required accessible `label`, optional coordinate-system `width` and `height`, and a children snippet for SVG elements. Give interactive controls their own keyboard-accessible HTML elements outside the image.
 
-`src/components/games/` contains the two Hidden Coin widgets. The calculator accepts each player's probability of choosing red. In the playable widget, the reader picks boxes as Bob and Alice commits a hide before every pick. Alice feeds Bob's payoffs divided by two into her MWU update with ε = 0.5. `src/lib/games/hidden-coin.ts` owns the payoff and update rules.
+`src/components/games/` contains the two Hidden Coin widgets. The calculator accepts each player's probability of choosing red. In the playable widget, the reader picks boxes as Bob and Alice commits a hide before every pick. Alice uses Bob's payoffs directly as losses in her MWU update with ε = 0.5. `src/lib/games/hidden-coin.ts` owns the payoff and update rules.
 
 ## Static hosting
 

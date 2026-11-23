@@ -38,7 +38,7 @@
           <div class="metric">
             <dt>Weight</dt>
             <dd>
-              {expert.weight.toFixed(3)}
+              {expert.weight > 0 && expert.weight < 0.001 ? '<0.001' : expert.weight.toFixed(3)}
               <span class="track" aria-hidden="true"><span style:inline-size={`${expert.weight * 100}%`}></span></span>
             </dd>
           </div>

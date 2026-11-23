@@ -1,7 +1,6 @@
 export type Box = 'red' | 'blue';
 
-const foundPayoff: Readonly<Record<Box, number>> = { red: 2, blue: 1 };
-const maxPayoff = foundPayoff.red;
+const foundPayoff: Readonly<Record<Box, number>> = { red: 1, blue: 0.5 };
 export const hiderEpsilon = 0.5;
 
 export function hiddenCoinExpectation(hideRed: number, pickRed: number) {
@@ -37,8 +36,8 @@ export function hideRedProbability({ logWeights }: Pick<HiderGame, 'logWeights'>
 }
 
 export function hiderRegret({ logWeights, expectedTotalPayoff }: HiderGame): number {
-  // Each log weight is the negative cumulative payoff for that fixed hide, scaled by ε / maxPayoff.
-  const bestFixedPayoff = -Math.max(logWeights.red, logWeights.blue) * maxPayoff / hiderEpsilon;
+  // Each log weight is the negative cumulative payoff for that fixed hide, multiplied by ε.
+  const bestFixedPayoff = -Math.max(logWeights.red, logWeights.blue) / hiderEpsilon;
   return expectedTotalPayoff - bestFixedPayoff;
 }
 
@@ -58,7 +57,7 @@ export function playHiderRound(game: HiderGame, picked: Box, nextDraw: number): 
   const { expectedPayoff } = hiddenCoinExpectation(hideRedProbability(game), picked === 'red' ? 1 : 0);
   const logWeights = {
     ...game.logWeights,
-    [picked]: game.logWeights[picked] - hiderEpsilon * foundPayoff[picked] / maxPayoff,
+    [picked]: game.logWeights[picked] - hiderEpsilon * foundPayoff[picked],
   };
   return {
     logWeights,

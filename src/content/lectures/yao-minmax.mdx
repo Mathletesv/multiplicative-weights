@@ -18,14 +18,17 @@ $R_"pub"^epsilon (F)$ is the lowest cost of a randomized protocol $P$ such that 
 
 <TheoremBlock id="yao-minimax-theorem">
 
-For any function $F : X times Y -> Z$, $R_"pub"^epsilon (F) = max_(mu "any dist") D_mu^epsilon (F)$
+Given finite input sets $X, Y$, for any function $F : X times Y -> Z$, 
+$$
+R_"pub"^epsilon (F) = max_(mu "any dist") D_mu^epsilon (F)
+$$
 
 </TheoremBlock>
 
 Before going forward, try to see if you can prove the theorem now.
 
 <HintBlock id="yao-minimax-hint">
-  <span slot="summary">Hint</span>
+  <span slot="summary">Hint for Yao's Minimax Theorem</span>
 
 Formalize it with multiplicative weights similarly to two-player games.
 There is also a way to formalize Yao's Minimax Principle as a 2-player game and immediately solve it with Von Neumann's Minimax Theorem, 
@@ -35,22 +38,35 @@ but try to do it directly using multiplicative weights.
 
 # Multiplicative Weights Model
 
-Fix the cost bound $c = max_(mu "any dist") D_mu^epsilon (F)$. Fix $N$ such that the inputs have length $|x| = |y| = N$.
-By our choice of $c$, for every input distribution $mu$, there is a deterministic protocol of cost at most $c$ with error at most $epsilon$ under $mu$.
+Fix the cost bound $c = max_(mu "any dist") D_mu^epsilon (F)$.
+By our choice of $c$, for every joint input distribution $mu$, there is a deterministic protocol of cost at most $c$ with error at most $epsilon$ under $mu$.
 
-We run MWU with each input pair corresponding to an expert. There are a finite number of input pairs.
+We run MWU with each input pair corresponding to an expert. There are a finite number of input pairs $N = |X times Y|$.
 We set the initial weights of all experts to $1$.
 For each round $t$:
 1. Normalize the weights to get a distribution $mu_t$ over input pairs.
 2. Choose a deterministic protocol $P_t$ of cost at most $c$ and error at most $epsilon$ under $mu_t$. This exists by assumption.
-3. Set the MWU loss of $(x, y)$, $ell_t (x, y)$ to $1$ if $P_t (x, y) = f(x, y)$ and $0$ otherwise and update the weights accordingly.
+3. Set the MWU loss of $(x, y)$, $ell_t (x, y)$ to $1$ if $P_t (x, y) = F(x, y)$ and $0$ otherwise and update the weights accordingly.
 
-It is reasonable to expect this communication similarity to be quite different from finite zero-sum 2-player games,
-but in fact from here the proof is the same as the one described at the end of the previous section.
+It is reasonable to expect this communication situation to be quite different from finite zero-sum 2-player games,
+but in fact from here the proof is very similar to the one described at the end of the previous section.
 Our final randomized protocol will simply be uniformly randomly choosing a round $t in [T]$ and then running $P_t$.
 
 Notice that we are assigning high loss to successful input pairs. This causes incorrect input pairs to be weighted higher in the distribution,
- which means we will be more likely to select a protocol which gets them right as well.
+ which means getting the same inputs wrong again takes up more of the protocol's error budget.
+
+This theorem allows you to determine the exact value of $R_"pub"^epsilon (F)$ by finding a randomized protocol with a certain cost $c$ and error $epsilon$,
+and then a single difficult distribution $mu$ where you can prove $D_mu^epsilon (F) >= c$. 
+Try this for your favorite function, a simple example is equality on two-bit strings with $epsilon = 1/3$.
+
+<HintBlock id="two-bit-equality-hint">
+  <span slot="summary">Hint for two-bit equality</span>
+
+Consider a few simple deterministic protocols where Alice sends $1$ bit and Bob responds with the answer.
+
+Consider distributions where $x$ is chosen based on $y$.
+
+</HintBlock>
 
 The beauty of the multiplicative weights algorithm lies in its immediate applicability once a problem can be modeled as an instance of applying the algorithm.
 

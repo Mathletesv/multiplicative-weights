@@ -22,7 +22,7 @@ We also never want to count an expert out, because they may improve over time.
 The multiplicative weights algorithm formalizes this intuition precisely by randomly choosing an expert based on weights
 and lowering the weights of experts based on the costs of their decisions.
 This algorithm performs asymptotically optimally in the general case where the costs of each decision may be chosen in any manner, 
-even adversarially. Note that this means the algorithm's strategy is known and used by the adversary,
+even adversarially. Note that this means the algorithm's strategy may be known and used by the adversary,
 but the costs must still be fixed before the strategy resolves its choice.
 
 # Algorithm
@@ -44,8 +44,6 @@ $p_t$ always remains a probability distribution since $sum_(i = 1)^N p_t (i) = s
 
 Note that if $epsilon$ is large, the weights will decay faster.
 So increasing $epsilon$ causes round $t$ to have more probability concentrated on the experts with lower cumulative loss prior to round $t$.
-
-We will interchangeably treat $ell_t$ as a $N$-element vector and a function $[N] -> [0, 1]$ for convenience in notation.
 
 The following widget shows this algorithm in action. Keep in mind that the cumulative loss it displays is not the expected regret.
 But the expected cumulative loss minus the minimum cumulative loss of an expert is the expected regret.
@@ -112,7 +110,8 @@ Using the lower bound from $Phi_(T + 1) >= omega_(T + 1) (i)$ yields that for an
 $$
   exp(-epsilon sum_(t = 1)^T ell_t (i)) <= Phi_(T + 1) <= N exp(epsilon^2 T - epsilon sum_(t = 1)^T p_t dot ell_t)
 $$
-Taking the logarithm on both sides,
+We now have a 2-sided bound for $Phi_(T + 1)$, and our goal was actually to relate these two sides with each other.
+So we now drop $Phi_(T + 1)$ and continue with the inequality between the lower and upper bounds. Taking the logarithm on both sides,
 $$
   -epsilon sum_(t = 1)^T ell_t (i) &<= ln(N) + epsilon^2 T - epsilon sum_(t = 1)^T p_t dot ell_t \
   ==> - sum_(t = 1)^T ell_t (i) &<= ln(N)/epsilon + epsilon T - sum_(t = 1)^T p_t dot ell_t && ("Divide by" epsilon) \
@@ -129,13 +128,14 @@ $$
 $$
 </ProofBlock>
 
-So we can choose the learning rate to ensure that the total regret increases by a square root factor of $T$.
+So we can choose the learning rate to ensure that the total regret bound increases by a square root factor of $T$.
 First fixing $N$, this tells us that for example if we multiply the number of decisions by $100$, the regret bound only grows by a factor of $10$.
 But what this means is that on average per decision, the bound on our regret is $1/10$th of what it was before. 
 In general, the average regret per decision is bounded by $2sqrt(T ln(N))/T = 2sqrt(ln(N)/T)$, which shrinks as $T$ increases.
 
-Furthermore, if we fix $T$, this regret increases by a square root of log factor of $N$, so even with many more experts
-we still expect to do almost as well as the best fixed expert in hindsight.
+Furthermore, if we fix $T$, this regret bound increases by a square root of log factor of $N$, so even with many more experts
+this bound grows very slowly and we still expect to do almost as well as the best fixed expert in hindsight.
+This is incredible as with many more experts, even if they are all almost random the best fixed expert in hindsight may be significantly better.
 
 # General Regret Lower Bound
 
@@ -147,7 +147,7 @@ a choice of loss functions for which the algorithm cannot do asymptotically bett
 <ExpertGame preset="coin-flip-experts" collapsible client:visible />
 
 <TheoremBlock id="general-lower-bound">
-There exists a universal constant $c > 0$ such that for any online decision making algorithm $A$ given $N >= 2$ decisions and $R >= 2$ rounds,
+There exists a universal constant $c > 0$ such that for any online decision making algorithm $A$ given $N >= 2$ experts and $R >= 2$ decision rounds,
 there exists a sequence $ell_1, dots, ell_R in [0, 1]^N$ of loss functions such that
 $min_(i in [N]) sum_(t = 1)^R ell_t (i) >= R/2$ and if the algorithm chooses decision distributions
 $p_1, dots, p_R$
@@ -164,9 +164,9 @@ We will show that the luckiest of $N$ experts will do well enough on average to 
 Some tools from probability are used in this proof, all of which will certainly be discussed in an introductory probability course such as 
 [this one](https://www.math.cmu.edu/~gautam/c/2026-425/notes/index.html) with the exception of the following lemma.
 
-Concentration Lemma: Let $X ~ "Binom(T, 1/2)"$ and $a in [0, T/8]$. Then
+Concentration Lemma: There $exists c_0, C_0 > 0$ such that for integer $T > 0$, $X ~ "Binom(T, 1/2)"$, and $a in [0, T/8]$ we have
 $$
-  P[X <= T/2 - a] >= 1/15 e^(-16 a^2/T)
+  P[X <= T/2 - a] >= c_0 e^(-C_0 a^2/T)
 $$
 
 Knowing the details of this proof is not necessary but it is here if you desire to see it.
@@ -174,16 +174,35 @@ Knowing the details of this proof is not necessary but it is here if you desire 
 <ProofBlock id="concentration-lemma-proof">
   <span slot="summary">Proof of the concentration lemma</span>
 
-**TODO**
+Let $X = sum_(t = 1)^T B_t$ with independent $B_t ~ "Bernoulli"(1/2)$.
+
+Then set $Z_t = 2B_t - 1$, which are now iid Rademacher.
+We have $sum_(t = 1)^T Z_t = 2X - T$.
+
+Apply Corollary 4 from [On the non-asymptotic and sharp lower tail bounds of random variables](https://par.nsf.gov/servlets/purl/10292172).
+
+Choose $beta = 4$, $k = T$, $x = 2a$. Note this satisfies $0 <= x <= T/4$.
+So we have 
+$$
+Pr[X <= T/2 - a] = Pr[sum_(t = 1)^T Z_t <= -2a] >= c_4 exp(-(4C_4 a^2)/T)
+$$
+
+Then take $c_0 = c_4$ and $C_0 = 4C_4$.
+These constants are universal since we fixed $beta = 4$.
 
 </ProofBlock>
 
-
-<ProofBlock id="lb-proof" for="general-lower-bound">
-<span slot="summary">Proof</span>
-
 Let $T = floor(R/2)$ be the first half of the decisions and $N >= 2$ experts.
-We will first work with just the first $T$ decisions. We set the loss of expert $1$ to be $1/2$ for every decisions.
+We will start by working with just the first $T$ decisions, and the
+second half of the decisions will be used to lower bound the loss of the best expert in hindsight.
+
+We will proceed with the proof in two steps.
+The first half will construct the situation and lower bound the probability that some expert gets lucky.
+
+<ProofBlock id="lb-proof-part1" for="general-lower-bound">
+<span slot="summary">Proof Part 1</span>
+
+We will now work with just the first $T$ decisions. We set the loss of expert $1$ to be $1/2$ for every decision.
 For $i > 1$, for each decision $t$, its loss is determined by a fair coin flip $0$ for tails, $1$ for heads (If you know probability this is a Bernoulli($1/2$) random variable).
 So the expected loss for any decision is $1/2$. The coin flips are independent across experts and rounds, and are independent of the algorithm's randomness.
 As a result, any online algorithm incurs expected loss $1/2$ in each of the first $T$ rounds.
@@ -198,28 +217,35 @@ We used the fact that $ell_t$ is independent of $p_t$ as fresh randomness is use
 For every $i$, let $X_i = sum_(t = 1)^T ell_t (i)$, note that $X_1 = T/2$ and for $i > 1$, $X_i ~ "Binom"(T, 1/2)$.
 
 We have $N - 1$ independent chances for an expert to get lucky and finish with loss at most $T/2 - a$.
-A probabiliy on order of $1/N$ is enough to give us a constant chance that at least one succeeds.
-The concentration lemma guarantees this probability whenever $a <= T/8$ and $16a^2/T <= ln(N)$.
-So we tale $a = min{T/8, 1/4 sqrt(T ln N)}$ to yield 
+A probability on order of $1/N$ is enough to give us a constant chance that at least one succeeds.
+The concentration lemma guarantees this probability whenever $a <= T/8$ and $C_0a^2/T <= ln(N)$.
+So we take $a = min{T/8, sqrt((T ln N)/C_0)}$ to yield 
 $$
-  P[X_i > T/2 - a] &<= 1 - 1/15 e^(-16 a^2/T) \
-    &<= 1 - 1/15 e^(-16/T (1/16 sqrt(T ln(N))^2)) \
-    &= 1 - 1/15 e^(-ln(N)) \
-    &= 1 - 1/(15N) 
+  P[X_i > T/2 - a] &<= 1 - c_0 e^(-C_0 a^2/T) \
+    &<= 1 - c_0 e^(-C_0 (T ln(N))/(C_0 T)) \
+    &= 1 - c_0 e^(-ln(N)) \
+    &= 1 - c_0/N 
 $$
-
 
 Now we can take the minimum
 $$
-  P[min_(i in [N]) X_i > T/2 - a] &= product_(i = 2)^N P[X_i > T/2 - a] && "By independence and $X_1 = T/2$" \
-  &<= (1 - 1/(15N))^(N - 1) \
-  &<= e^(-(N - 1)/(15N)) \
-  &<= e^(-1/30)
+  P[min_(i in [N]) X_i > T/2 - a] &= product_(i = 2)^N P[X_i > T/2 - a] && ("By independence and" X_1 = T/2) \
+  &<= (1 - c_0/N)^(N - 1) && ("Substituting the above bound") \
+  &<= e^(-((N - 1)c_0)/N) && ("Applying" e^(-x) >= 1 - x)\
+  &<= e^(-c_0/2) && ("Since" e^x "is increasing")
 $$
+We now know that the probability the best expert in hindsight ends the first $T$ rounds with loss at most $T/2 - a$ is at least $1 - e^(-c_0/2)$, which is a constant strictly greater than $0$.
+
+</ProofBlock>
+
+The second half will extend this lower bound to provide the total lower bound we desire.
+
+<ProofBlock id="lb-proof" for="general-lower-bound">
+<span slot="summary">Proof Part 2</span>
 
 Let $M = min_(i in [N]) X_i$ be the best expert's loss over the first $T$ rounds. Since $X_1 = T/2$, we know $X_1 - M >= 0$ for every outcome.
 $$
-  E[T/2 - M] >= a P[T/2 - M >= a] = a P[M <= T/2 - a] >= a(1 - e^(-1/30))
+  E[T/2 - M] >= a P[T/2 - M >= a] = a P[M <= T/2 - a] >= a(1 - e^(-c_0/2))
 $$
 
 For the remaining decisions after $T$, we set the loss of every expert to be $1$.
@@ -229,11 +255,11 @@ The algorithm's total loss is $sum_(t = 1)^T p_t dot ell_t + (R - T)$, so the ex
 $$
   E[(sum_(t = 1)^T p_t dot ell_t + (R - T)) - (M + (R - T))] &= E[sum_(t = 1)^T p_t dot ell_t] - E[M] \
   &= T/2 - E[M] && ("Expected value of algorithm") \
-  &>= a(1 - e^(-1/30)) && ("Expected value bound") \
-  &= min{T/8, 1/4 sqrt(T ln(N))} (1 - e^(-1/30)) && ("Substituting") \
-  &>= 1/24 min{R, sqrt(R ln(N))} (1 - e^(-1/30)) && (T >= R/3)
+  &>= a(1 - e^(-c_0/2)) && ("Expected value bound") \
+  &= min{T/8, sqrt((T ln(N))/C_0)} (1 - e^(-c_0/2)) && ("Substituting") \
+  &>= min{1/24, 1/sqrt(3 C_0)} min{R, sqrt(R ln(N))} (1 - e^(-c_0/2)) && (T >= R/3)
 $$
-Our constant is $c = 1/24 (1 - e^(-1/30))$
+Our constant is $c = min{1/24, 1/sqrt(3 C_0)} (1 - e^(-c_0/2))$
 
 Averaged over the random losses and algorithm's randomness, the expected value of the regret
 is lower bounded by $c (min{R, sqrt(R ln(N))})$. So there must exist some fixed
@@ -244,11 +270,18 @@ a sequence of loss functions satisfying the theorem.
 This is the probabilistic method in action, as we have used expectation to show that such a sequence of loss functions must exist.
 </ProofBlock>
 
+Using this theorem along with the regret upper bound and returning to use $T$ as the number of decisions, when $ln(N) <= T$
+there exists a sequence of losses in which we can bound the regret from both sides as
+$$
+  c min{T, sqrt(T ln(N))} <= E[sum_(t = 1)^T p_t dot ell_t] - min_(i in [N]) sum_(t = 1)^T ell_t (i) <= 2sqrt(T ln(N))
+$$
+Note how precise this is, as it tells us that the worst case expected regret of multiplicative weights is $Theta (sqrt(T ln(N)))$.
+
 # Loss Extension
 
 It turns out that for any bounded losses $[a, b]$ where $a, b in RR, a < b$, this algorithm still works and the regret bound is simply scaled by $b - a$.
 To prove this we can retrace the steps of the proof and make all of the necessary modifications, or we can notice that we can transform the losses
-with an affine function. Let $f_t$ be the loss functions $f : [N] -> [a, b]$.
+with an affine function. Let $f_t$ be the loss functions $f_t : [N] -> [a, b]$.
 
 Then we let $ell_t (i) = (f_t (i) - a)/(b - a), ell_t : [N] -> [0, 1]$ and notice that this affine transformation does not change what strategies are optimal.
 The regret is then bounded by $(b - a)(T epsilon + ln(N)/epsilon)$. Try to prove this.
